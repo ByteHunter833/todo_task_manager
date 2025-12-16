@@ -1,0 +1,44 @@
+name: todo_task_manager
+description: 'A new Flutter project.'
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.10.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  sizer: ^3.1.3
+  flutter_svg: ^2.2.3
+  connectivity_plus: ^6.1.0 # Версия 7.0.0 требует более новый Dart, понижаем для совместимости
+  google_fonts: ^6.2.1
+  fl_chart: ^0.65.0
+  firebase_core: ^3.0.0 # Версии 4.x могут конфликтовать, используем стабильную 3.x
+  google_sign_in: ^6.2.1
+  # ВАЖНО: Стабильная версия riverpod для Flutter - это 2.x
+  flutter_riverpod: ^2.6.1
+  firebase_auth: ^5.0.0
+  cloud_firestore: ^5.0.0
+
+  # Isar
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # ВАЖНО: Версия 6.0.0 требует Dart 3.7+. Для вашего SDK нужна версия ниже.
+  flutter_lints: ^3.0.1
+
+  # Эти пакеты ОБЯЗАТЕЛЬНЫ для работы Isar
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.8
+
+flutter:
+  uses-material-design: true

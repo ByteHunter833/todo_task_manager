@@ -1,0 +1,126 @@
+{
+  "project_info": {
+    "project_number": "995149379469",
+    "project_id": "ecommerce-1269a",
+    "storage_bucket": "ecommerce-1269a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995149379469:android:ecc3621b382029effaefc4",
+        "android_client_info": {
+          "package_name": "com.example.aura_shop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995149379469-u0frkean9nmbn7ikmdfl165aq8rav4ts.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aura_shop",
+            "certificate_hash": "d9eadf0961284ae635fddca855069cf29cd6472a"
+          }
+        },
+        {
+          "client_id": "995149379469-qpm9lknb5i1u0scuq7miqn5valfbho5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm7kvsPxI3zhCHKyQdD8cnQc_eMUzKwfw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995149379469-5l4biud5d0cg7cu575rrmda9op361fv2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "995149379469-213icku76a0oonip72mifju9tose67dl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.chatMessager"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995149379469:android:6c55dcc79c943c2ffaefc4",
+        "android_client_info": {
+          "package_name": "com.example.messager_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995149379469-qpm9lknb5i1u0scuq7miqn5valfbho5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm7kvsPxI3zhCHKyQdD8cnQc_eMUzKwfw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995149379469-5l4biud5d0cg7cu575rrmda9op361fv2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "995149379469-213icku76a0oonip72mifju9tose67dl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.chatMessager"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995149379469:android:d61b10b7645e39cefaefc4",
+        "android_client_info": {
+          "package_name": "com.example.todo_task_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995149379469-qpm9lknb5i1u0scuq7miqn5valfbho5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm7kvsPxI3zhCHKyQdD8cnQc_eMUzKwfw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995149379469-5l4biud5d0cg7cu575rrmda9op361fv2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "995149379469-213icku76a0oonip72mifju9tose67dl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.chatMessager"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
