@@ -1,52 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 
 import '../../../core/app_export.dart';
 
 class TaskCardWidget extends StatelessWidget {
-  final Map<String, dynamic> task;
+  final Todo task;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onDelete;
   final VoidCallback? onSnooze;
 
   const TaskCardWidget({
-    Key? key,
+    super.key,
     required this.task,
     this.onTap,
     this.onComplete,
     this.onDelete,
     this.onSnooze,
-  }) : super(key: key);
+  });
 
   Color _getPriorityColor() {
-    final priority = task['priority'] as String? ?? 'Medium';
-    switch (priority.toLowerCase()) {
-      case 'high':
+    switch (task.priority) {
+      case TodoPriority.high:
         return AppTheme.lightTheme.colorScheme.error;
-      case 'low':
+      case TodoPriority.low:
         return AppTheme.lightTheme.colorScheme.tertiary;
-      default:
+      case TodoPriority.medium:
         return AppTheme.lightTheme.colorScheme.secondary;
     }
   }
 
   Color _getCategoryColor() {
-    final category = task['category'] as String? ?? 'Personal';
-    switch (category.toLowerCase()) {
-      case 'work':
+    switch (task.category) {
+      case TodoCategory.work:
         return AppTheme.lightTheme.primaryColor;
-      case 'shopping':
+      case TodoCategory.shopping:
         return AppTheme.lightTheme.colorScheme.tertiary;
-      case 'health':
+      case TodoCategory.health:
         return Colors.green;
       default:
         return AppTheme.lightTheme.colorScheme.secondary;
     }
   }
 
+  String _getPriorityName() {
+    switch (task.priority) {
+      case TodoPriority.high:
+        return 'High';
+      case TodoPriority.medium:
+        return 'Medium';
+      case TodoPriority.low:
+        return 'Low';
+    }
+  }
+
+  String _getCategoryName() {
+    switch (task.category) {
+      case TodoCategory.work:
+        return 'Work';
+      case TodoCategory.personal:
+        return 'Personal';
+      case TodoCategory.health:
+        return 'Health';
+      case TodoCategory.shopping:
+        return 'Shopping';
+      case TodoCategory.education:
+        return 'Education';
+      case TodoCategory.finance:
+        return 'Finance';
+    }
+  }
+
+  String _getCategoryIcon() {
+    switch (task.category) {
+      case TodoCategory.work:
+        return 'work';
+      case TodoCategory.shopping:
+        return 'shopping_cart';
+      case TodoCategory.health:
+        return 'favorite';
+      case TodoCategory.education:
+        return 'school';
+      case TodoCategory.finance:
+        return 'account_balance_wallet';
+      default:
+        return 'person';
+    }
+  }
+
   String _formatDueDate() {
-    final dueDate = task['dueDate'] as DateTime?;
+    final dueDate = task.dueDate;
     if (dueDate == null) return '';
 
     final now = DateTime.now();
@@ -65,23 +109,21 @@ class TaskCardWidget extends StatelessWidget {
   }
 
   bool _isOverdue() {
-    final dueDate = task['dueDate'] as DateTime?;
+    final dueDate = task.dueDate;
     if (dueDate == null) return false;
     return dueDate.isBefore(DateTime.now()) &&
-        !(task['isCompleted'] as bool? ?? false);
+        !(task.isCompleted as bool? ?? false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted = task['isCompleted'] as bool? ?? false;
-    final title = task['title'] as String? ?? 'Untitled Task';
-    final description = task['description'] as String? ?? '';
-    final priority = task['priority'] as String? ?? 'Medium';
-    final category = task['category'] as String? ?? 'Personal';
+    final isCompleted = task.isCompleted as bool? ?? false;
+    final title = task.title as String? ?? 'Untitled Task';
+    final description = task.description ?? '';
     final isOverdue = _isOverdue();
 
     return Dismissible(
-      key: Key('task_${task['id']}'),
+      key: Key('task_${task.id}'),
       background: Container(
         margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
         decoration: BoxDecoration(
@@ -93,7 +135,7 @@ class TaskCardWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CustomIconWidget(
+            const CustomIconWidget(
               iconName: 'check_circle',
               color: Colors.white,
               size: 24,
@@ -121,7 +163,11 @@ class TaskCardWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CustomIconWidget(iconName: 'delete', color: Colors.white, size: 24),
+            const CustomIconWidget(
+              iconName: 'delete',
+              color: Colors.white,
+              size: 24,
+            ),
             SizedBox(height: 0.5.h),
             Text(
               'Delete',
@@ -205,9 +251,9 @@ class TaskCardWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          priority,
+                          _getPriorityName(),
                           style: TextStyle(
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
                             color: _getPriorityColor(),
                           ),
@@ -215,7 +261,7 @@ class TaskCardWidget extends StatelessWidget {
                       ),
                       if (isCompleted) ...[
                         SizedBox(width: 2.w),
-                        CustomIconWidget(
+                        const CustomIconWidget(
                           iconName: 'check_circle',
                           color: Colors.green,
                           size: 20,
@@ -256,21 +302,15 @@ class TaskCardWidget extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CustomIconWidget(
-                              iconName: category.toLowerCase() == 'work'
-                                  ? 'work'
-                                  : category.toLowerCase() == 'shopping'
-                                  ? 'shopping_cart'
-                                  : category.toLowerCase() == 'health'
-                                  ? 'favorite'
-                                  : 'person',
+                              iconName: _getCategoryIcon(),
                               color: _getCategoryColor(),
-                              size: 12,
+                              size: 14,
                             ),
                             SizedBox(width: 1.w),
                             Text(
-                              category,
+                              _getCategoryName(),
                               style: TextStyle(
-                                fontSize: 10.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
                                 color: _getCategoryColor(),
                               ),

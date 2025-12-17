@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
+import 'package:todo_task_manager/providers/todo_provider.dart';
 
 import '../../core/app_export.dart';
 import './widgets/empty_state_widget.dart';
@@ -8,30 +11,28 @@ import './widgets/filter_bottom_sheet_widget.dart';
 import './widgets/sort_bottom_sheet_widget.dart';
 import './widgets/task_card_widget.dart';
 
-class TaskListView extends StatefulWidget {
+class TaskListView extends ConsumerStatefulWidget {
   const TaskListView({super.key});
 
   @override
-  State<TaskListView> createState() => _TaskListViewState();
+  ConsumerState<TaskListView> createState() => _TaskListViewState();
 }
 
-class _TaskListViewState extends State<TaskListView>
+class _TaskListViewState extends ConsumerState<TaskListView>
     with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  List<Map<String, dynamic>> _allTasks = [];
-  List<Map<String, dynamic>> _filteredTasks = [];
+  List<Todo> _allTasks = [];
+  List<Todo> _filteredTasks = [];
   Map<String, dynamic> _activeFilters = {};
   String _sortBy = 'dueDate';
   bool _sortAscending = true;
-  bool _isLoading = false;
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _initializeMockData();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -42,98 +43,33 @@ class _TaskListViewState extends State<TaskListView>
     super.dispose();
   }
 
-  void _initializeMockData() {
-    _allTasks = [
-      {
-        "id": 1,
-        "title": "Complete quarterly report",
-        "description":
-            "Finish the Q4 financial analysis and prepare presentation slides for the board meeting next week.",
-        "dueDate": DateTime.now().add(const Duration(days: 2, hours: 14)),
-        "priority": "High",
-        "category": "Work",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 5)),
-      },
-      {
-        "id": 2,
-        "title": "Buy groceries",
-        "description":
-            "Get milk, bread, eggs, and vegetables for the week. Don't forget the organic apples.",
-        "dueDate": DateTime.now().add(const Duration(hours: 3)),
-        "priority": "Medium",
-        "category": "Shopping",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 1)),
-      },
-      {
-        "id": 3,
-        "title": "Schedule dentist appointment",
-        "description":
-            "Call Dr. Smith's office to book a routine cleaning appointment for next month.",
-        "dueDate": DateTime.now().add(const Duration(days: 1, hours: 10)),
-        "priority": "Low",
-        "category": "Health",
-        "isCompleted": true,
-        "createdAt": DateTime.now().subtract(const Duration(days: 3)),
-      },
-      {
-        "id": 4,
-        "title": "Review project proposal",
-        "description":
-            "Go through the new client proposal and provide feedback on technical requirements and timeline.",
-        "dueDate": DateTime.now().subtract(const Duration(hours: 2)),
-        "priority": "High",
-        "category": "Work",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 7)),
-      },
-      {
-        "id": 5,
-        "title": "Plan weekend trip",
-        "description":
-            "Research destinations, book accommodation, and create an itinerary for the family weekend getaway.",
-        "dueDate": DateTime.now().add(const Duration(days: 5, hours: 18)),
-        "priority": "Medium",
-        "category": "Personal",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 2)),
-      },
-      {
-        "id": 6,
-        "title": "Update resume",
-        "description":
-            "Add recent projects and achievements to resume. Update LinkedIn profile as well.",
-        "dueDate": DateTime.now().add(const Duration(days: 7, hours: 12)),
-        "priority": "Low",
-        "category": "Personal",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 4)),
-      },
-      {
-        "id": 7,
-        "title": "Team meeting preparation",
-        "description":
-            "Prepare agenda items and review team performance metrics for tomorrow's meeting.",
-        "dueDate": DateTime.now().add(const Duration(hours: 16)),
-        "priority": "High",
-        "category": "Work",
-        "isCompleted": true,
-        "createdAt": DateTime.now().subtract(const Duration(days: 1)),
-      },
-      {
-        "id": 8,
-        "title": "Gym workout",
-        "description":
-            "Complete full body workout routine. Focus on cardio and strength training.",
-        "dueDate": DateTime.now().add(const Duration(hours: 6)),
-        "priority": "Medium",
-        "category": "Health",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(hours: 12)),
-      },
-    ];
-    _applyFiltersAndSort();
+  // Helper methods for enum conversion
+  String _priorityToString(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.high:
+        return 'High';
+      case TodoPriority.medium:
+        return 'Medium';
+      case TodoPriority.low:
+        return 'Low';
+    }
+  }
+
+  String _categoryToString(TodoCategory category) {
+    switch (category) {
+      case TodoCategory.work:
+        return 'Work';
+      case TodoCategory.personal:
+        return 'Personal';
+      case TodoCategory.health:
+        return 'Health';
+      case TodoCategory.shopping:
+        return 'Shopping';
+      case TodoCategory.education:
+        return 'Education';
+      case TodoCategory.finance:
+        return 'Finance';
+    }
   }
 
   void _onSearchChanged() {
@@ -144,24 +80,21 @@ class _TaskListViewState extends State<TaskListView>
   }
 
   void _applyFiltersAndSort() {
-    List<Map<String, dynamic>> filtered = List.from(_allTasks);
+    List<Todo> filtered = List.from(_allTasks);
 
-    // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((task) {
-        final title = (task['title'] as String? ?? '').toLowerCase();
-        final description = (task['description'] as String? ?? '')
-            .toLowerCase();
+        final title = (task.title as String? ?? '').toLowerCase();
+        final description = (task.description ?? '').toLowerCase();
         return title.contains(_searchQuery) ||
             description.contains(_searchQuery);
       }).toList();
     }
 
-    // Apply date range filter
     if (_activeFilters.containsKey('dateRange')) {
       final dateRange = _activeFilters['dateRange'] as DateTimeRange;
       filtered = filtered.where((task) {
-        final dueDate = task['dueDate'] as DateTime?;
+        final dueDate = task.dueDate;
         if (dueDate == null) return false;
         return dueDate.isAfter(
               dateRange.start.subtract(const Duration(days: 1)),
@@ -170,28 +103,25 @@ class _TaskListViewState extends State<TaskListView>
       }).toList();
     }
 
-    // Apply priority filter
     if (_activeFilters.containsKey('priority')) {
       final priorities = _activeFilters['priority'] as List<String>;
       filtered = filtered.where((task) {
-        return priorities.contains(task['priority'] as String);
+        return priorities.contains(_priorityToString(task.priority));
       }).toList();
     }
 
-    // Apply category filter
     if (_activeFilters.containsKey('category')) {
       final categories = _activeFilters['category'] as List<String>;
       filtered = filtered.where((task) {
-        return categories.contains(task['category'] as String);
+        return categories.contains(_categoryToString(task.category));
       }).toList();
     }
 
-    // Apply status filter
     if (_activeFilters.containsKey('status')) {
       final statuses = _activeFilters['status'] as List<String>;
       filtered = filtered.where((task) {
-        final isCompleted = task['isCompleted'] as bool? ?? false;
-        final dueDate = task['dueDate'] as DateTime?;
+        final isCompleted = task.isCompleted;
+        final dueDate = task.dueDate;
         final isOverdue =
             dueDate != null && dueDate.isBefore(DateTime.now()) && !isCompleted;
 
@@ -210,39 +140,41 @@ class _TaskListViewState extends State<TaskListView>
 
       switch (_sortBy) {
         case 'dueDate':
-          final aDate = a['dueDate'] as DateTime?;
-          final bDate = b['dueDate'] as DateTime?;
-          if (aDate == null && bDate == null)
+          final aDate = a.dueDate;
+          final bDate = b.dueDate;
+          if (aDate == null && bDate == null) {
             comparison = 0;
-          else if (aDate == null)
+          } else if (aDate == null) {
             comparison = 1;
-          else if (bDate == null)
+          } else if (bDate == null) {
             comparison = -1;
-          else
+          } else {
             comparison = aDate.compareTo(bDate);
+          }
           break;
         case 'priority':
           final priorityOrder = {'High': 3, 'Medium': 2, 'Low': 1};
-          final aPriority = priorityOrder[a['priority'] as String] ?? 0;
-          final bPriority = priorityOrder[b['priority'] as String] ?? 0;
+          final aPriority = priorityOrder[_priorityToString(a.priority)] ?? 0;
+          final bPriority = priorityOrder[_priorityToString(b.priority)] ?? 0;
           comparison = aPriority.compareTo(bPriority);
           break;
         case 'category':
-          comparison = (a['category'] as String? ?? '').compareTo(
-            b['category'] as String? ?? '',
-          );
+          comparison = _categoryToString(
+            a.category,
+          ).compareTo(_categoryToString(b.category));
           break;
         case 'createdAt':
-          final aCreated = a['createdAt'] as DateTime?;
-          final bCreated = b['createdAt'] as DateTime?;
-          if (aCreated == null && bCreated == null)
+          final aCreated = a.createdAt as DateTime?;
+          final bCreated = b.createdAt as DateTime?;
+          if (aCreated == null && bCreated == null) {
             comparison = 0;
-          else if (aCreated == null)
+          } else if (aCreated == null) {
             comparison = 1;
-          else if (bCreated == null)
+          } else if (bCreated == null) {
             comparison = -1;
-          else
+          } else {
             comparison = aCreated.compareTo(bCreated);
+          }
           break;
       }
 
@@ -298,39 +230,19 @@ class _TaskListViewState extends State<TaskListView>
     });
   }
 
-  void _toggleTaskCompletion(int taskId) {
-    setState(() {
-      final taskIndex = _allTasks.indexWhere((task) => task['id'] == taskId);
-      if (taskIndex != -1) {
-        _allTasks[taskIndex]['isCompleted'] =
-            !(_allTasks[taskIndex]['isCompleted'] as bool);
-        _applyFiltersAndSort();
-      }
-    });
-
+  void _toggleTaskCompletion(Todo todo) {
+    ref.read(todoRepositoryProvider).toggle(todo);
     HapticFeedback.lightImpact();
   }
 
   void _deleteTask(int taskId) {
-    setState(() {
-      _allTasks.removeWhere((task) => task['id'] == taskId);
-      _applyFiltersAndSort();
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Task deleted'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            // In a real app, you would restore the task here
-          },
-        ),
-      ),
-    );
+    ref.read(todoRepositoryProvider).delete(taskId);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Task deleted')));
   }
 
-  void _snoozeTask(int taskId) {
+  void _snoozeTask(Todo todo) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -344,21 +256,12 @@ class _TaskListViewState extends State<TaskListView>
           TextButton(
             onPressed: () {
               // Snooze for 1 hour
-              setState(() {
-                final taskIndex = _allTasks.indexWhere(
-                  (task) => task['id'] == taskId,
+              if (todo.dueDate != null) {
+                final updatedTodo = todo.copyWith(
+                  dueDate: todo.dueDate!.add(const Duration(hours: 1)),
                 );
-                if (taskIndex != -1) {
-                  final currentDue =
-                      _allTasks[taskIndex]['dueDate'] as DateTime?;
-                  if (currentDue != null) {
-                    _allTasks[taskIndex]['dueDate'] = currentDue.add(
-                      const Duration(hours: 1),
-                    );
-                    _applyFiltersAndSort();
-                  }
-                }
-              });
+                ref.read(todoRepositoryProvider).add(updatedTodo);
+              }
               Navigator.pop(context);
             },
             child: const Text('1 Hour'),
@@ -366,21 +269,12 @@ class _TaskListViewState extends State<TaskListView>
           TextButton(
             onPressed: () {
               // Snooze for 1 day
-              setState(() {
-                final taskIndex = _allTasks.indexWhere(
-                  (task) => task['id'] == taskId,
+              if (todo.dueDate != null) {
+                final updatedTodo = todo.copyWith(
+                  dueDate: todo.dueDate!.add(const Duration(days: 1)),
                 );
-                if (taskIndex != -1) {
-                  final currentDue =
-                      _allTasks[taskIndex]['dueDate'] as DateTime?;
-                  if (currentDue != null) {
-                    _allTasks[taskIndex]['dueDate'] = currentDue.add(
-                      const Duration(days: 1),
-                    );
-                    _applyFiltersAndSort();
-                  }
-                }
-              });
+                ref.read(todoRepositoryProvider).add(updatedTodo);
+              }
               Navigator.pop(context);
             },
             child: const Text('1 Day'),
@@ -391,26 +285,23 @@ class _TaskListViewState extends State<TaskListView>
   }
 
   Future<void> _refreshTasks() async {
-    setState(() {
-      _isLoading = true;
-    });
+    // Refresh by calling watch again
+    await Future.delayed(const Duration(milliseconds: 300));
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    _applyFiltersAndSort();
+    ref.invalidate(todosStreamProvider);
   }
 
-  bool get _hasActiveFilters {
-    return _activeFilters.isNotEmpty || _searchQuery.isNotEmpty;
+  void _onTaskTap(Todo taskMap) {
+    HapticFeedback.lightImpact();
+
+    Navigator.pushNamed(context, '/add-edit-task', arguments: taskMap);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Watch the todos stream from Riverpod
+    final todosAsync = ref.watch(todosStreamProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -452,159 +343,178 @@ class _TaskListViewState extends State<TaskListView>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search and Filter Header
-          Container(
-            color: AppTheme.lightTheme.colorScheme.surface,
-            padding: EdgeInsets.fromLTRB(4.w, 0, 4.w, 2.h),
-            child: Column(
-              children: [
-                Row(
+      body: todosAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (allTodos) {
+          // Update internal state with fetched todos
+          _allTasks = allTodos;
+          _applyFiltersAndSort();
+
+          final bool hasActiveFilters =
+              _activeFilters.isNotEmpty || _searchQuery.isNotEmpty;
+
+          return Column(
+            children: [
+              // Search and Filter Header
+              Container(
+                color: AppTheme.lightTheme.colorScheme.surface,
+                padding: EdgeInsets.fromLTRB(4.w, 0, 4.w, 2.h),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppTheme.lightTheme.scaffoldBackgroundColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppTheme.lightTheme.colorScheme.outline
-                                .withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Search tasks...',
-                            prefixIcon: Padding(
-                              padding: EdgeInsets.all(3.w),
-                              child: CustomIconWidget(
-                                iconName: 'search',
-                                color: AppTheme.lightTheme.colorScheme.onSurface
-                                    .withValues(alpha: 0.6),
-                                size: 20,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color:
+                                  AppTheme.lightTheme.scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppTheme.lightTheme.colorScheme.outline
+                                    .withValues(alpha: 0.2),
                               ),
                             ),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    onPressed: () {
-                                      _searchController.clear();
-                                    },
-                                    icon: CustomIconWidget(
-                                      iconName: 'close',
-                                      color: AppTheme
-                                          .lightTheme
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.6),
-                                      size: 20,
-                                    ),
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 4.w,
-                              vertical: 2.h,
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search tasks...',
+                                prefixIcon: Padding(
+                                  padding: EdgeInsets.all(3.w),
+                                  child: CustomIconWidget(
+                                    iconName: 'search',
+                                    color: AppTheme
+                                        .lightTheme
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.6),
+                                    size: 20,
+                                  ),
+                                ),
+                                suffixIcon: _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        onPressed: () {
+                                          _searchController.clear();
+                                        },
+                                        icon: CustomIconWidget(
+                                          iconName: 'close',
+                                          color: AppTheme
+                                              .lightTheme
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.6),
+                                          size: 20,
+                                        ),
+                                      )
+                                    : null,
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color:
+                                    AppTheme.lightTheme.colorScheme.onSurface,
+                              ),
                             ),
                           ),
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppTheme.lightTheme.colorScheme.onSurface,
+                        ),
+                        SizedBox(width: 3.w),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: hasActiveFilters
+                                ? AppTheme.lightTheme.colorScheme.primary
+                                : AppTheme.lightTheme.scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: hasActiveFilters
+                                  ? AppTheme.lightTheme.colorScheme.primary
+                                  : AppTheme.lightTheme.colorScheme.outline
+                                        .withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: IconButton(
+                            onPressed: _showFilterBottomSheet,
+                            icon: CustomIconWidget(
+                              iconName: 'filter_list',
+                              color: hasActiveFilters
+                                  ? Colors.white
+                                  : AppTheme.lightTheme.colorScheme.onSurface
+                                        .withValues(alpha: 0.6),
+                              size: 24,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    SizedBox(width: 3.w),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: _hasActiveFilters
-                            ? AppTheme.lightTheme.colorScheme.primary
-                            : AppTheme.lightTheme.scaffoldBackgroundColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _hasActiveFilters
-                              ? AppTheme.lightTheme.colorScheme.primary
-                              : AppTheme.lightTheme.colorScheme.outline
-                                    .withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: IconButton(
-                        onPressed: _showFilterBottomSheet,
-                        icon: CustomIconWidget(
-                          iconName: 'filter_list',
-                          color: _hasActiveFilters
-                              ? Colors.white
-                              : AppTheme.lightTheme.colorScheme.onSurface
+                    if (hasActiveFilters) ...[
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${_filteredTasks.length} task${_filteredTasks.length != 1 ? 's' : ''} found',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppTheme.lightTheme.colorScheme.onSurface
                                     .withValues(alpha: 0.6),
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_hasActiveFilters) ...[
-                  SizedBox(height: 2.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${_filteredTasks.length} task${_filteredTasks.length != 1 ? 's' : ''} found',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppTheme.lightTheme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _clearAllFilters,
-                        child: Text(
-                          'Clear All',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppTheme.lightTheme.colorScheme.primary,
+                          TextButton(
+                            onPressed: _clearAllFilters,
+                            child: Text(
+                              'Clear All',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppTheme.lightTheme.colorScheme.primary,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
 
-          // Task List
-          Expanded(
-            child: _filteredTasks.isEmpty
-                ? EmptyStateWidget(
-                    hasActiveFilters: _hasActiveFilters,
-                    onClearFilters: _clearAllFilters,
-                    onCreateTask: () =>
-                        Navigator.pushNamed(context, '/add-edit-task'),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _refreshTasks,
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: _filteredTasks.length,
-                      itemBuilder: (context, index) {
-                        final task = _filteredTasks[index];
-                        return TaskCardWidget(
-                          task: task,
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/add-edit-task'),
-                          onComplete: () =>
-                              _toggleTaskCompletion(task['id'] as int),
-                          onDelete: () => _deleteTask(task['id'] as int),
-                          onSnooze: () => _snoozeTask(task['id'] as int),
-                        );
-                      },
-                    ),
-                  ),
-          ),
-        ],
+              // Task List
+              Expanded(
+                child: _filteredTasks.isEmpty
+                    ? EmptyStateWidget(
+                        hasActiveFilters: hasActiveFilters,
+                        onClearFilters: _clearAllFilters,
+                        onCreateTask: () =>
+                            Navigator.pushNamed(context, '/add-edit-task'),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _refreshTasks,
+                        color: AppTheme.lightTheme.colorScheme.primary,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: _filteredTasks.length,
+                          itemBuilder: (context, index) {
+                            final task = _filteredTasks[index];
+                            return TaskCardWidget(
+                              task: task,
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/add-edit-task',
+                              ),
+                              onComplete: () => _toggleTaskCompletion(task),
+                              onDelete: () => _deleteTask(task.id),
+                              onSnooze: () => _snoozeTask(task),
+                            );
+                          },
+                        ),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/add-edit-task'),

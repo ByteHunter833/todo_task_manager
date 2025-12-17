@@ -458,7 +458,7 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
           _buildSectionTitle('Category'),
           SizedBox(height: 1.h),
           DropdownButtonFormField<String>(
-            value: _selectedCategory,
+            initialValue: _selectedCategory,
             decoration: InputDecoration(
               prefixIcon: Padding(
                 padding: EdgeInsets.all(3.w),

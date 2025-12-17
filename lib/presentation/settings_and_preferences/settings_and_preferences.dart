@@ -22,7 +22,6 @@ class SettingsAndPreferences extends ConsumerStatefulWidget {
 
 class _SettingsAndPreferencesState
     extends ConsumerState<SettingsAndPreferences> {
-  // Appearance settings
   bool _isDarkMode = false;
   String _selectedThemeColor = "blue";
   // Notification settings
@@ -42,6 +41,24 @@ class _SettingsAndPreferencesState
   bool _analyticsEnabled = true;
   // Language settings
   String _currentLanguage = "en";
+
+  // get userName
+  String get userName {
+    final currentUser = ref.read(currentUserProvider);
+    final user = currentUser.value;
+    return user!.displayName!
+        .toLowerCase()
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
+  // get userEmail
+  String get userEmail {
+    final currentUser = ref.read(currentUserProvider);
+    final user = currentUser.value;
+    return user!.email ?? 'No Email';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,16 +196,13 @@ class _SettingsAndPreferencesState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'John Doe',
+                  userName,
                   style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 0.5.h),
-                Text(
-                  'john.doe@email.com',
-                  style: AppTheme.lightTheme.textTheme.bodySmall,
-                ),
+                Text(userEmail, style: AppTheme.lightTheme.textTheme.bodySmall),
                 SizedBox(height: 0.5.h),
                 Container(
                   padding: EdgeInsets.symmetric(
