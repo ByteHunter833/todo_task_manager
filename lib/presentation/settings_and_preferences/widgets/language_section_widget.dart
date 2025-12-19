@@ -19,22 +19,22 @@ class LanguageSectionWidget extends StatefulWidget {
 
 class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
   final List<Map<String, String>> languages = [
-    {"name": "English", "code": "en", "flag": "🇺🇸"},
-    {"name": "Español", "code": "es", "flag": "🇪🇸"},
-    {"name": "Français", "code": "fr", "flag": "🇫🇷"},
-    {"name": "Deutsch", "code": "de", "flag": "🇩🇪"},
-    {"name": "Italiano", "code": "it", "flag": "🇮🇹"},
-    {"name": "Português", "code": "pt", "flag": "🇵🇹"},
-    {"name": "中文", "code": "zh", "flag": "🇨🇳"},
-    {"name": "日本語", "code": "ja", "flag": "🇯🇵"},
-    {"name": "한국어", "code": "ko", "flag": "🇰🇷"},
-    {"name": "العربية", "code": "ar", "flag": "🇸🇦"},
+    {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
+    {'name': 'Español', 'code': 'es', 'flag': '🇪🇸'},
+    {'name': 'Français', 'code': 'fr', 'flag': '🇫🇷'},
+    {'name': 'Deutsch', 'code': 'de', 'flag': '🇩🇪'},
+    {'name': 'Italiano', 'code': 'it', 'flag': '🇮🇹'},
+    {'name': 'Português', 'code': 'pt', 'flag': '🇵🇹'},
+    {'name': '中文', 'code': 'zh', 'flag': '🇨🇳'},
+    {'name': '日本語', 'code': 'ja', 'flag': '🇯🇵'},
+    {'name': '한국어', 'code': 'ko', 'flag': '🇰🇷'},
+    {'name': 'العربية', 'code': 'ar', 'flag': '🇸🇦'},
   ];
 
   @override
   Widget build(BuildContext context) {
     final currentLang = languages.firstWhere(
-      (lang) => lang["code"] == widget.currentLanguage,
+      (lang) => lang['code'] == widget.currentLanguage,
       orElse: () => languages.first,
     );
 
@@ -88,7 +88,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
               ),
               child: Center(
                 child: Text(
-                  currentLang["flag"]!,
+                  currentLang['flag']!,
                   style: const TextStyle(fontSize: 20),
                 ),
               ),
@@ -98,7 +98,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
               style: AppTheme.lightTheme.textTheme.bodyLarge,
             ),
             subtitle: Text(
-              currentLang["name"]!,
+              currentLang['name']!,
               style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -106,7 +106,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.currentLanguage != "en")
+                if (widget.currentLanguage != 'en')
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 2.w,
@@ -200,8 +200,8 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
             itemCount: languages.length,
             itemBuilder: (context, index) {
               final language = languages[index];
-              final isSelected = widget.currentLanguage == language["code"];
-              final isComingSoon = language["code"] != "en";
+              final isSelected = widget.currentLanguage == language['code'];
+              final isComingSoon = language['code'] != 'en';
 
               return ListTile(
                 leading: Container(
@@ -220,7 +220,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
                   ),
                   child: Center(
                     child: Text(
-                      language["flag"]!,
+                      language['flag']!,
                       style: const TextStyle(fontSize: 20),
                     ),
                   ),
@@ -229,7 +229,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
                   children: [
                     Expanded(
                       child: Text(
-                        language["name"]!,
+                        language['name']!,
                         style: AppTheme.lightTheme.textTheme.bodyLarge
                             ?.copyWith(
                               fontWeight: isSelected
@@ -294,7 +294,7 @@ class _LanguageSectionWidgetState extends State<LanguageSectionWidget> {
                         );
                       }
                     : () {
-                        widget.onLanguageChanged(language["code"]!);
+                        widget.onLanguageChanged(language['code']!);
                         Navigator.pop(context);
                       },
               );

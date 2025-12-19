@@ -43,7 +43,6 @@ class _TaskListViewState extends ConsumerState<TaskListView>
     super.dispose();
   }
 
-  // Helper methods for enum conversion
   String _priorityToString(TodoPriority priority) {
     switch (priority) {
       case TodoPriority.high:
@@ -287,14 +286,8 @@ class _TaskListViewState extends ConsumerState<TaskListView>
   Future<void> _refreshTasks() async {
     // Refresh by calling watch again
     await Future.delayed(const Duration(milliseconds: 300));
-
+    // Invalidate the provider to trigger a refresh
     ref.invalidate(todosStreamProvider);
-  }
-
-  void _onTaskTap(Todo taskMap) {
-    HapticFeedback.lightImpact();
-
-    Navigator.pushNamed(context, '/add-edit-task', arguments: taskMap);
   }
 
   @override
@@ -503,6 +496,7 @@ class _TaskListViewState extends ConsumerState<TaskListView>
                               onTap: () => Navigator.pushNamed(
                                 context,
                                 '/add-edit-task',
+                                arguments: task,
                               ),
                               onComplete: () => _toggleTaskCompletion(task),
                               onDelete: () => _deleteTask(task.id),

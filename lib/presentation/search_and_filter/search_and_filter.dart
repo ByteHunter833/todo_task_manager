@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../core/data/models/todo.dart';
+import '../../providers/todo_provider.dart';
 import './widgets/advanced_filter_widget.dart';
 import './widgets/filter_chips_widget.dart';
 import './widgets/recent_searches_widget.dart';
 import './widgets/search_bar_widget.dart';
 import './widgets/search_results_widget.dart';
 
-class SearchAndFilter extends StatefulWidget {
+class SearchAndFilter extends ConsumerStatefulWidget {
   const SearchAndFilter({super.key});
 
   @override
-  State<SearchAndFilter> createState() => _SearchAndFilterState();
+  ConsumerState<SearchAndFilter> createState() => _SearchAndFilterState();
 }
 
-class _SearchAndFilterState extends State<SearchAndFilter> {
+class _SearchAndFilterState extends ConsumerState<SearchAndFilter> {
   final TextEditingController _searchController = TextEditingController();
 
   // Search and filter state
@@ -38,12 +41,10 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
 
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
-  List<Map<String, dynamic>> _allTasks = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeMockData();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -53,107 +54,32 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
     super.dispose();
   }
 
-  void _initializeMockData() {
-    _allTasks = [
-      {
-        "id": 1,
-        "title": "Complete project proposal",
-        "description":
-            "Finalize the quarterly project proposal with budget analysis and timeline. Include stakeholder feedback and risk assessment.",
-        "dueDate": DateTime.now().add(const Duration(days: 3)),
-        "priority": "High",
-        "category": "Work",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 5)),
-        "modifiedAt": DateTime.now().subtract(const Duration(hours: 2)),
-      },
-      {
-        "id": 2,
-        "title": "Buy groceries for dinner",
-        "description":
-            "Get ingredients for pasta dinner: tomatoes, basil, parmesan cheese, and ground beef.",
-        "dueDate": DateTime.now(),
-        "priority": "Medium",
-        "category": "Shopping",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 1)),
-        "modifiedAt": DateTime.now().subtract(const Duration(minutes: 30)),
-      },
-      {
-        "id": 3,
-        "title": "Schedule dentist appointment",
-        "description":
-            "Call Dr. Smith's office to schedule routine cleaning and checkup.",
-        "dueDate": DateTime.now().add(const Duration(days: 7)),
-        "priority": "Low",
-        "category": "Health",
-        "isCompleted": true,
-        "createdAt": DateTime.now().subtract(const Duration(days: 10)),
-        "modifiedAt": DateTime.now().subtract(const Duration(days: 2)),
-      },
-      {
-        "id": 4,
-        "title": "Review quarterly budget",
-        "description":
-            "Analyze Q3 expenses and prepare budget recommendations for Q4.",
-        "dueDate": DateTime.now().subtract(const Duration(days: 2)),
-        "priority": "High",
-        "category": "Finance",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 15)),
-        "modifiedAt": DateTime.now().subtract(const Duration(days: 1)),
-      },
-      {
-        "id": 5,
-        "title": "Prepare presentation slides",
-        "description":
-            "Create slides for Monday's team meeting covering project updates and next steps.",
-        "dueDate": DateTime.now().add(const Duration(days: 1)),
-        "priority": "Medium",
-        "category": "Work",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 3)),
-        "modifiedAt": DateTime.now().subtract(const Duration(hours: 4)),
-      },
-      {
-        "id": 6,
-        "title": "Morning workout routine",
-        "description":
-            "30-minute cardio session followed by strength training focusing on upper body.",
-        "dueDate": DateTime.now().add(const Duration(days: 1)),
-        "priority": "Low",
-        "category": "Personal",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 7)),
-        "modifiedAt": DateTime.now().subtract(const Duration(hours: 12)),
-      },
-      {
-        "id": 7,
-        "title": "Update project documentation",
-        "description":
-            "Revise technical documentation and user guides for the new software release.",
-        "dueDate": DateTime.now().add(const Duration(days: 5)),
-        "priority": "Medium",
-        "category": "Work",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 8)),
-        "modifiedAt": DateTime.now().subtract(const Duration(hours: 6)),
-      },
-      {
-        "id": 8,
-        "title": "Plan weekend trip",
-        "description":
-            "Research destinations, book accommodations, and create itinerary for weekend getaway.",
-        "dueDate": DateTime.now().add(const Duration(days: 10)),
-        "priority": "Low",
-        "category": "Personal",
-        "isCompleted": false,
-        "createdAt": DateTime.now().subtract(const Duration(days: 12)),
-        "modifiedAt": DateTime.now().subtract(const Duration(days: 3)),
-      },
-    ];
+  String _priorityToString(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.high:
+        return 'High';
+      case TodoPriority.medium:
+        return 'Medium';
+      case TodoPriority.low:
+        return 'Low';
+    }
+  }
 
-    _performSearch();
+  String _categoryToString(TodoCategory category) {
+    switch (category) {
+      case TodoCategory.work:
+        return 'Work';
+      case TodoCategory.personal:
+        return 'Personal';
+      case TodoCategory.health:
+        return 'Health';
+      case TodoCategory.shopping:
+        return 'Shopping';
+      case TodoCategory.education:
+        return 'Education';
+      case TodoCategory.finance:
+        return 'Finance';
+    }
   }
 
   void _onSearchChanged() {
@@ -162,7 +88,6 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
       setState(() {
         _searchQuery = query;
       });
-      _performSearch();
 
       // Add to recent searches if not empty and not already present
       if (query.isNotEmpty && !_recentSearches.contains(query)) {
@@ -176,8 +101,8 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
     }
   }
 
-  void _performSearch() {
-    List<Map<String, dynamic>> results = List.from(_allTasks);
+  void _performSearchOnTodos(List<Map<String, dynamic>> allTasks) {
+    List<Map<String, dynamic>> results = List.from(allTasks);
 
     // Apply text search
     if (_searchQuery.isNotEmpty) {
@@ -336,7 +261,6 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
           _searchController.text = 'meeting preparation';
           _searchQuery = 'meeting preparation';
         });
-        _performSearch();
       }
     });
   }
@@ -345,21 +269,18 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
     setState(() {
       _activeFilters = Map.from(filters);
     });
-    _performSearch();
   }
 
   void _onRemoveFilter(String filterKey) {
     setState(() {
       _activeFilters.remove(filterKey);
     });
-    _performSearch();
   }
 
   void _onClearAllFilters() {
     setState(() {
       _activeFilters.clear();
     });
-    _performSearch();
   }
 
   void _onRecentSearchTap(String search) {
@@ -367,7 +288,6 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
     setState(() {
       _searchQuery = search;
     });
-    _performSearch();
   }
 
   void _onRemoveRecentSearch(String search) {
@@ -380,11 +300,10 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
     setState(() {
       _sortBy = sortBy;
     });
-    _performSearch();
   }
 
-  void _onTaskTap(Map<String, dynamic> task) {
-    Navigator.pushNamed(context, '/add-edit-task', arguments: task);
+  void _onTaskTap(Todo todo) {
+    Navigator.pushNamed(context, '/add-edit-task', arguments: todo);
   }
 
   void _onToggleAdvancedFilter() {
@@ -395,6 +314,8 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
 
   @override
   Widget build(BuildContext context) {
+    final todosAsyncValue = ref.watch(todosStreamProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -419,55 +340,84 @@ class _SearchAndFilterState extends State<SearchAndFilter> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          // 1. Верхняя часть (Поиск и Фильтры) помещается в адаптер
-          SliverToBoxAdapter(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 1.h),
-                SearchBarWidget(
-                  searchController: _searchController,
-                  onSearchChanged: (query) {},
-                  onVoiceSearch: _onVoiceSearch,
-                  isVoiceSearching: _isVoiceSearching,
-                ),
-                FilterChipsWidget(
-                  activeFilters: _activeFilters,
-                  onRemoveFilter: _onRemoveFilter,
-                  onClearAll: _onClearAllFilters,
-                ),
-                AdvancedFilterWidget(
-                  currentFilters: _activeFilters,
-                  onFiltersChanged: _onFiltersChanged,
-                  isExpanded: _isAdvancedFilterExpanded,
-                  onToggleExpanded: _onToggleAdvancedFilter,
-                ),
-                SizedBox(height: 1.h),
-              ],
-            ),
-          ),
+      body: todosAsyncValue.when(
+        data: (todos) {
+          // Convert Todo objects to search-compatible format
+          final allTasks = todos.map((todo) {
+            return {
+              'id': todo.id,
+              'title': todo.title,
+              'description': todo.description ?? '',
+              'dueDate': todo.dueDate,
+              'priority': _priorityToString(todo.priority),
+              'category': _categoryToString(todo.category),
+              'isCompleted': todo.isCompleted,
+              'createdAt': todo.createdAt,
+              'modifiedAt': todo.createdAt,
+              'todo': todo, // Store original Todo object
+            };
+          }).toList();
 
-          // 2. Нижняя часть (Контент) занимает все оставшееся место
-          SliverFillRemaining(
-            hasScrollBody:
-                true, // Установите true, если внутри виджетов есть свой ScrollView (например, ListView)
-            child: _searchQuery.isEmpty && _activeFilters.isEmpty
-                ? RecentSearchesWidget(
-                    recentSearches: _recentSearches,
-                    onSearchTap: _onRecentSearchTap,
-                    onRemoveSearch: _onRemoveRecentSearch,
-                  )
-                : SearchResultsWidget(
-                    searchResults: _searchResults,
-                    searchQuery: _searchQuery,
-                    sortBy: _sortBy,
-                    onSortChanged: _onSortChanged,
-                    onTaskTap: _onTaskTap,
-                  ),
-          ),
-        ],
+          // Perform search on all tasks
+          _performSearchOnTodos(allTasks);
+
+          return CustomScrollView(
+            slivers: [
+              // 1. Search and Filter section
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 1.h),
+                    SearchBarWidget(
+                      searchController: _searchController,
+                      onSearchChanged: (query) {},
+                      onVoiceSearch: _onVoiceSearch,
+                      isVoiceSearching: _isVoiceSearching,
+                    ),
+                    FilterChipsWidget(
+                      activeFilters: _activeFilters,
+                      onRemoveFilter: _onRemoveFilter,
+                      onClearAll: _onClearAllFilters,
+                    ),
+                    AdvancedFilterWidget(
+                      currentFilters: _activeFilters,
+                      onFiltersChanged: _onFiltersChanged,
+                      isExpanded: _isAdvancedFilterExpanded,
+                      onToggleExpanded: _onToggleAdvancedFilter,
+                    ),
+                    SizedBox(height: 1.h),
+                  ],
+                ),
+              ),
+
+              // 2. Content section
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: _searchQuery.isEmpty && _activeFilters.isEmpty
+                    ? RecentSearchesWidget(
+                        recentSearches: _recentSearches,
+                        onSearchTap: _onRecentSearchTap,
+                        onRemoveSearch: _onRemoveRecentSearch,
+                      )
+                    : SearchResultsWidget(
+                        searchResults: _searchResults,
+                        searchQuery: _searchQuery,
+                        sortBy: _sortBy,
+                        onSortChanged: _onSortChanged,
+                        onTaskTap: (task) {
+                          if (task['todo'] != null) {
+                            _onTaskTap(task['todo'] as Todo);
+                          }
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) =>
+            Center(child: Text('Error loading tasks: $error')),
       ),
     );
   }

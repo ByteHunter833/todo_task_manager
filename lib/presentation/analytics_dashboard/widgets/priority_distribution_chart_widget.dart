@@ -1,34 +1,67 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 
 class PriorityDistributionChartWidget extends StatelessWidget {
-  const PriorityDistributionChartWidget({super.key});
+  final Map<TodoPriority, int>? priorityDistribution;
+
+  const PriorityDistributionChartWidget({super.key, this.priorityDistribution});
+
+  List<Map<String, dynamic>> _buildPriorityData() {
+    if (priorityDistribution == null || priorityDistribution!.isEmpty) {
+      return [
+        {
+          'priority': 'High',
+          'completed': 18,
+          'total': 25,
+          'color': const Color(0xFFDC2626),
+          'value': 25,
+        },
+        {
+          'priority': 'Medium',
+          'completed': 32,
+          'total': 40,
+          'color': const Color(0xFFD97706),
+          'value': 40,
+        },
+        {
+          'priority': 'Low',
+          'completed': 28,
+          'total': 30,
+          'color': const Color(0xFF059669),
+          'value': 30,
+        },
+      ];
+    }
+
+    final priorityNames = {
+      TodoPriority.high: 'High',
+      TodoPriority.medium: 'Medium',
+      TodoPriority.low: 'Low',
+    };
+
+    final priorityColors = {
+      TodoPriority.high: const Color(0xFFDC2626),
+      TodoPriority.medium: const Color(0xFFD97706),
+      TodoPriority.low: const Color(0xFF059669),
+    };
+
+    return priorityDistribution!.entries
+        .map(
+          (entry) => {
+            'priority': priorityNames[entry.key] ?? 'Unknown',
+            'value': entry.value,
+            'color': priorityColors[entry.key] ?? Colors.grey,
+          },
+        )
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    final List<Map<String, dynamic>> priorityData = [
-      {
-        "priority": "High",
-        "completed": 18,
-        "total": 25,
-        "color": const Color(0xFFDC2626),
-      },
-      {
-        "priority": "Medium",
-        "completed": 32,
-        "total": 40,
-        "color": const Color(0xFFD97706),
-      },
-      {
-        "priority": "Low",
-        "completed": 28,
-        "total": 30,
-        "color": const Color(0xFF059669),
-      },
-    ];
+    final priorityData = _buildPriorityData();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w),
@@ -66,12 +99,13 @@ class PriorityDistributionChartWidget extends StatelessWidget {
                     tooltipRoundedRadius: 8,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final data = priorityData[group.x.toInt()];
-                      final completed = data["completed"];
-                      final total = data["total"];
-                      final priority = data["priority"];
+                      final priority = data['priority'] as String;
+                      final completed =
+                          data['completed'] as int? ??
+                          (data['value'] as int? ?? 0);
 
                       return BarTooltipItem(
-                        '$priority Priority\n$completed/$total tasks\n${((completed / total) * 100).toStringAsFixed(1)}%',
+                        '$priority Priority\n$completed tasks',
                         TextStyle(
                           color: theme.colorScheme.onInverseSurface,
                           fontWeight: FontWeight.w500,
@@ -98,7 +132,7 @@ class PriorityDistributionChartWidget extends StatelessWidget {
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
                             child: Text(
-                              priorityData[index]["priority"] as String,
+                              priorityData[index]['priority'] as String,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
@@ -145,9 +179,12 @@ class PriorityDistributionChartWidget extends StatelessWidget {
                 barGroups: priorityData.asMap().entries.map((entry) {
                   final index = entry.key;
                   final data = entry.value;
-                  final completed = data["completed"] as int;
-                  final total = data["total"] as int;
-                  final color = data["color"] as Color;
+                  final completed =
+                      (data['completed'] as int?) ??
+                      (data['value'] as int? ?? 0);
+                  final total =
+                      (data['total'] as int?) ?? (data['value'] as int? ?? 0);
+                  final color = data['color'] as Color;
 
                   return BarChartGroupData(
                     x: index,

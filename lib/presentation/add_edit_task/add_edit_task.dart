@@ -10,38 +10,11 @@ import 'package:todo_task_manager/providers/todo_provider.dart';
 import '../../core/app_export.dart';
 import './widgets/task_form_widget.dart';
 
-Todo? _mapToTodo(Map<String, dynamic> map) {
-  if (map.isEmpty) return null;
-
-  try {
-    final priorityName = (map['priority'] as String? ?? TodoPriority.low.name)
-        .toLowerCase();
-    final categoryName =
-        (map['category'] as String? ?? TodoCategory.personal.name)
-            .toLowerCase();
-
-    final todo = Todo()
-      ..id = map['id'] as int
-      ..title = map['title'] as String
-      ..description = map['description'] as String?
-      ..priority = TodoPriority.values.byName(priorityName)
-      ..category = TodoCategory.values.byName(categoryName)
-      ..isCompleted = map['isCompleted'] as bool? ?? false
-      ..dueDate = map['dueDate'] as DateTime?
-      ..createdAt = map['createdAt'] as DateTime? ?? DateTime.now()
-      ..completedAt = map['completedAt'] as DateTime?;
-
-    return todo;
-  } catch (e) {
-    debugPrint('Error converting Map to Todo: $e');
-    return null;
-  }
-}
-
 class AddEditTask extends ConsumerStatefulWidget {
-  final Map<String, dynamic>? task;
+  final Todo? initialTodo;
+  final DateTime? selectedDate;
 
-  const AddEditTask({super.key, this.task});
+  const AddEditTask({super.key, this.initialTodo, this.selectedDate});
 
   @override
   ConsumerState<AddEditTask> createState() => _AddEditTaskState();
@@ -49,15 +22,6 @@ class AddEditTask extends ConsumerStatefulWidget {
 
 class _AddEditTaskState extends ConsumerState<AddEditTask> {
   bool _hasUnsavedChanges = false;
-  Todo? _initialTodo;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.task != null) {
-      _initialTodo = _mapToTodo(widget.task!);
-    }
-  }
 
   void _onFormChanged(bool hasChanges) {
     if (_hasUnsavedChanges != hasChanges) {
@@ -69,8 +33,11 @@ class _AddEditTaskState extends ConsumerState<AddEditTask> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = _initialTodo != null;
+    final isEditing = widget.initialTodo != null;
     final isarRepository = ref.read(todoRepositoryProvider);
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    print(args is DateTime);
 
     return PopScope(
       canPop: false,
@@ -114,10 +81,10 @@ class _AddEditTaskState extends ConsumerState<AddEditTask> {
           ),
           centerTitle: true,
           actions: [
-            if (isEditing && _initialTodo!.id != Isar.autoIncrement)
+            if (isEditing && widget.initialTodo!.id != Isar.autoIncrement)
               IconButton(
                 onPressed: () => _showDeleteConfirmationDialog(
-                  _initialTodo!.id,
+                  widget.initialTodo!.id,
                   isarRepository,
                 ),
                 icon: CustomIconWidget(
@@ -130,7 +97,8 @@ class _AddEditTaskState extends ConsumerState<AddEditTask> {
         ),
         body: SafeArea(
           child: TaskFormWidget(
-            initialTodo: _initialTodo,
+            initialTodo: widget.initialTodo,
+            selectedDate: widget.selectedDate,
             onSave: (todoToSave) => _handleSaveTask(todoToSave, isarRepository),
             onChanged: _onFormChanged,
           ),
@@ -144,7 +112,7 @@ class _AddEditTaskState extends ConsumerState<AddEditTask> {
       await repository.add(taskData);
 
       _showSuccessMessage(
-        _initialTodo != null
+        widget.initialTodo != null
             ? 'Task updated successfully!'
             : 'Task created successfully!',
       );

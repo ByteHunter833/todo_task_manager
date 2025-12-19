@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 
 import '../../../core/app_export.dart';
 import './task_card_widget.dart';
 
 class TaskSectionWidget extends StatefulWidget {
   final String title;
-  final List<Map<String, dynamic>> tasks;
+  final List<Todo> tasks;
   final Color? accentColor;
   final bool isExpandable;
-  final Function(Map<String, dynamic>)? onTaskTap;
-  final Function(Map<String, dynamic>)? onTaskComplete;
-  final Function(Map<String, dynamic>)? onTaskDelete;
-  final Function(Map<String, dynamic>)? onTaskEdit;
+  final Function(Todo)? onTaskTap;
+  final Function(Todo)? onTaskComplete;
+  final Function(Todo)? onTaskDelete;
+  final Function(Todo)? onTaskEdit;
 
   const TaskSectionWidget({
     super.key,

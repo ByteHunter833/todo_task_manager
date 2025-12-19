@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../providers/analytics_provider.dart';
 import './widgets/achievement_badges_widget.dart';
 import './widgets/category_breakdown_chart_widget.dart';
 import './widgets/completion_trend_chart_widget.dart';
@@ -10,14 +12,14 @@ import './widgets/priority_distribution_chart_widget.dart';
 import './widgets/productivity_insights_widget.dart';
 import './widgets/progress_ring_widget.dart';
 
-class AnalyticsDashboard extends StatefulWidget {
+class AnalyticsDashboard extends ConsumerStatefulWidget {
   const AnalyticsDashboard({super.key});
 
   @override
-  State<AnalyticsDashboard> createState() => _AnalyticsDashboardState();
+  ConsumerState<AnalyticsDashboard> createState() => _AnalyticsDashboardState();
 }
 
-class _AnalyticsDashboardState extends State<AnalyticsDashboard>
+class _AnalyticsDashboardState extends ConsumerState<AnalyticsDashboard>
     with SingleTickerProviderStateMixin {
   bool isWeeklyView = true;
   late TabController _tabController;
@@ -98,7 +100,6 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                 ],
               ),
             ),
-
             // Scrollable Content
             Expanded(
               child: TabBarView(
@@ -117,6 +118,36 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
   }
 
   Widget _buildWeeklyView() {
+    final analyticsAsync = ref.watch(weeklyAnalyticsProvider);
+
+    return analyticsAsync.when(
+      data: (analytics) => _buildAnalyticsView(analytics),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+
+  Widget _buildMonthlyView() {
+    final analyticsAsync = ref.watch(monthlyAnalyticsProvider);
+
+    return analyticsAsync.when(
+      data: (analytics) => _buildAnalyticsView(analytics),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+
+  Widget _buildYearlyView() {
+    final analyticsAsync = ref.watch(yearlyAnalyticsProvider);
+
+    return analyticsAsync.when(
+      data: (analytics) => _buildAnalyticsView(analytics),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+
+  Widget _buildAnalyticsView(AnalyticsMetrics analytics) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -127,8 +158,8 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
             children: [
               MetricsCardWidget(
                 title: 'Tasks Completed',
-                value: '89',
-                subtitle: 'This week',
+                value: analytics.tasksCompleted.toString(),
+                subtitle: 'This period',
                 iconName: 'check_circle',
                 iconColor: AppTheme.getSuccessColor(
                   Theme.of(context).brightness == Brightness.light,
@@ -136,8 +167,8 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
               ),
               MetricsCardWidget(
                 title: 'Completion Rate',
-                value: '84%',
-                subtitle: '+12% from last week',
+                value: '${analytics.completionRate.toStringAsFixed(1)}%',
+                subtitle: 'of all tasks',
                 iconName: 'trending_up',
                 iconColor: Theme.of(context).colorScheme.primary,
               ),
@@ -149,7 +180,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
             children: [
               MetricsCardWidget(
                 title: 'Current Streak',
-                value: '12',
+                value: analytics.currentStreak.toString(),
                 subtitle: 'Days in a row',
                 iconName: 'local_fire_department',
                 iconColor: AppTheme.getWarningColor(
@@ -158,7 +189,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
               ),
               MetricsCardWidget(
                 title: 'Daily Average',
-                value: '12.7',
+                value: analytics.dailyAverage.toStringAsFixed(1),
                 subtitle: 'Tasks per day',
                 iconName: 'bar_chart',
                 iconColor: AppTheme.getAccentColor(
@@ -199,16 +230,18 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
                   children: [
                     ProgressRingWidget(
                       title: 'Daily Goal',
-                      progress: 0.84,
-                      centerText: '84%',
+                      progress: (analytics.completionRate / 100).clamp(0.0, 1.0),
+                      centerText:
+                          '${analytics.completionRate.toStringAsFixed(0)}%',
                       progressColor: AppTheme.getSuccessColor(
                         Theme.of(context).brightness == Brightness.light,
                       ),
                     ),
                     ProgressRingWidget(
                       title: 'Weekly Goal',
-                      progress: 0.72,
-                      centerText: '72%',
+                      progress: (analytics.completionRate / 100).clamp(0.0, 1.0),
+                      centerText:
+                          '${analytics.completionRate.toStringAsFixed(0)}%',
                       progressColor: Theme.of(context).colorScheme.primary,
                     ),
                   ],
@@ -221,6 +254,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
           SizedBox(height: 3.h),
           CompletionTrendChartWidget(
             isWeeklyView: isWeeklyView,
+            dailyStats: analytics.dailyStats,
             onViewToggle: (bool weekly) {
               setState(() {
                 isWeeklyView = weekly;
@@ -230,11 +264,15 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
 
           // Category Breakdown
           SizedBox(height: 3.h),
-          const CategoryBreakdownChartWidget(),
+          CategoryBreakdownChartWidget(
+            categoryBreakdown: analytics.categoryBreakdown,
+          ),
 
           // Priority Distribution
           SizedBox(height: 3.h),
-          const PriorityDistributionChartWidget(),
+          PriorityDistributionChartWidget(
+            priorityDistribution: analytics.priorityDistribution,
+          ),
 
           // Productivity Insights
           SizedBox(height: 3.h),
@@ -242,135 +280,10 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard>
 
           // Achievement Badges
           SizedBox(height: 3.h),
-          const AchievementBadgesWidget(),
+          AchievementBadgesWidget(
+            analytics: analytics,
+          ),
 
-          SizedBox(height: 4.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMonthlyView() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(height: 2.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MetricsCardWidget(
-                title: 'Tasks Completed',
-                value: '342',
-                subtitle: 'This month',
-                iconName: 'check_circle',
-                iconColor: AppTheme.getSuccessColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-              MetricsCardWidget(
-                title: 'Completion Rate',
-                value: '78%',
-                subtitle: '+5% from last month',
-                iconName: 'trending_up',
-                iconColor: Theme.of(context).colorScheme.primary,
-              ),
-            ],
-          ),
-          SizedBox(height: 2.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MetricsCardWidget(
-                title: 'Best Streak',
-                value: '18',
-                subtitle: 'Days this month',
-                iconName: 'local_fire_department',
-                iconColor: AppTheme.getWarningColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-              MetricsCardWidget(
-                title: 'Monthly Average',
-                value: '11.4',
-                subtitle: 'Tasks per day',
-                iconName: 'bar_chart',
-                iconColor: AppTheme.getAccentColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 3.h),
-          CompletionTrendChartWidget(
-            isWeeklyView: false,
-            onViewToggle: (bool weekly) {},
-          ),
-          SizedBox(height: 3.h),
-          const CategoryBreakdownChartWidget(),
-          SizedBox(height: 3.h),
-          const PriorityDistributionChartWidget(),
-          SizedBox(height: 4.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildYearlyView() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(height: 2.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MetricsCardWidget(
-                title: 'Tasks Completed',
-                value: '3,847',
-                subtitle: 'This year',
-                iconName: 'check_circle',
-                iconColor: AppTheme.getSuccessColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-              MetricsCardWidget(
-                title: 'Completion Rate',
-                value: '82%',
-                subtitle: 'Annual average',
-                iconName: 'trending_up',
-                iconColor: Theme.of(context).colorScheme.primary,
-              ),
-            ],
-          ),
-          SizedBox(height: 2.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MetricsCardWidget(
-                title: 'Longest Streak',
-                value: '45',
-                subtitle: 'Days this year',
-                iconName: 'local_fire_department',
-                iconColor: AppTheme.getWarningColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-              MetricsCardWidget(
-                title: 'Yearly Average',
-                value: '10.5',
-                subtitle: 'Tasks per day',
-                iconName: 'bar_chart',
-                iconColor: AppTheme.getAccentColor(
-                  Theme.of(context).brightness == Brightness.light,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 3.h),
-          const CategoryBreakdownChartWidget(),
-          SizedBox(height: 3.h),
-          const ProductivityInsightsWidget(),
-          SizedBox(height: 3.h),
-          const AchievementBadgesWidget(),
           SizedBox(height: 4.h),
         ],
       ),

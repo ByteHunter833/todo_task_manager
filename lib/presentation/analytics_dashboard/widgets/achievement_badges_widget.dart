@@ -2,58 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../providers/analytics_provider.dart';
 
 class AchievementBadgesWidget extends StatelessWidget {
-  const AchievementBadgesWidget({super.key});
+  final AnalyticsMetrics? analytics;
+
+  const AchievementBadgesWidget({super.key, this.analytics});
+
+  List<Map<String, dynamic>> _buildAchievements() {
+    final achievements = <Map<String, dynamic>>[
+      {
+        'title': 'Task Master',
+        'description': 'Completed 100 tasks',
+        'iconName': 'emoji_events',
+        'isUnlocked': (analytics?.tasksCompleted ?? 0) >= 100,
+        'color': const Color(0xFFFFD700),
+      },
+      {
+        'title': 'Streak Champion',
+        'description': '10-day completion streak',
+        'iconName': 'local_fire_department',
+        'isUnlocked': (analytics?.currentStreak ?? 0) >= 10,
+        'color': const Color(0xFFFF6B35),
+      },
+      {
+        'title': 'Early Bird',
+        'description': 'Complete 5 tasks before 9 AM',
+        'iconName': 'wb_sunny',
+        'isUnlocked': false,
+        'color': const Color(0xFFFFA726),
+      },
+      {
+        'title': 'Productivity Pro',
+        'description': '95% completion rate for a week',
+        'iconName': 'trending_up',
+        'isUnlocked': (analytics?.completionRate ?? 0) >= 95,
+        'color': const Color(0xFF42A5F5),
+      },
+      {
+        'title': 'Category King',
+        'description': 'Complete tasks in 5 different categories',
+        'iconName': 'category',
+        'isUnlocked': (analytics?.categoryBreakdown.length ?? 0) >= 5,
+        'color': const Color(0xFF66BB6A),
+      },
+      {
+        'title': 'Speed Demon',
+        'description': 'Complete 20 tasks in one day',
+        'iconName': 'flash_on',
+        'isUnlocked': false,
+        'color': const Color(0xFFAB47BC),
+      },
+    ];
+
+    return achievements;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    final List<Map<String, dynamic>> achievements = [
-      {
-        "title": "Task Master",
-        "description": "Completed 100 tasks",
-        "iconName": "emoji_events",
-        "isUnlocked": true,
-        "color": const Color(0xFFFFD700),
-      },
-      {
-        "title": "Streak Champion",
-        "description": "10-day completion streak",
-        "iconName": "local_fire_department",
-        "isUnlocked": true,
-        "color": const Color(0xFFFF6B35),
-      },
-      {
-        "title": "Early Bird",
-        "description": "Complete 5 tasks before 9 AM",
-        "iconName": "wb_sunny",
-        "isUnlocked": true,
-        "color": const Color(0xFFFFA726),
-      },
-      {
-        "title": "Productivity Pro",
-        "description": "95% completion rate for a week",
-        "iconName": "trending_up",
-        "isUnlocked": false,
-        "color": const Color(0xFF42A5F5),
-      },
-      {
-        "title": "Category King",
-        "description": "Complete tasks in 5 different categories",
-        "iconName": "category",
-        "isUnlocked": false,
-        "color": const Color(0xFF66BB6A),
-      },
-      {
-        "title": "Speed Demon",
-        "description": "Complete 20 tasks in one day",
-        "iconName": "flash_on",
-        "isUnlocked": false,
-        "color": const Color(0xFFAB47BC),
-      },
-    ];
+    final achievements = _buildAchievements();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w),
@@ -104,7 +112,7 @@ class AchievementBadgesWidget extends StatelessWidget {
     Map<String, dynamic> achievement,
   ) {
     final theme = Theme.of(context);
-    final isUnlocked = achievement["isUnlocked"] as bool;
+    final isUnlocked = achievement['isUnlocked'] as bool;
 
     return GestureDetector(
       onTap: () {
@@ -114,12 +122,12 @@ class AchievementBadgesWidget extends StatelessWidget {
         padding: EdgeInsets.all(3.w),
         decoration: BoxDecoration(
           color: isUnlocked
-              ? (achievement["color"] as Color).withValues(alpha: 0.1)
+              ? (achievement['color'] as Color).withValues(alpha: 0.1)
               : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isUnlocked
-                ? (achievement["color"] as Color).withValues(alpha: 0.3)
+                ? (achievement['color'] as Color).withValues(alpha: 0.3)
                 : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
             width: 1,
           ),
@@ -131,12 +139,12 @@ class AchievementBadgesWidget extends StatelessWidget {
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
                 color: isUnlocked
-                    ? achievement["color"] as Color
+                    ? achievement['color'] as Color
                     : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: CustomIconWidget(
-                iconName: achievement["iconName"] as String,
+                iconName: achievement['iconName'] as String,
                 color: isUnlocked
                     ? Colors.white
                     : theme.colorScheme.onSurfaceVariant,
@@ -145,7 +153,7 @@ class AchievementBadgesWidget extends StatelessWidget {
             ),
             SizedBox(height: 1.h),
             Text(
-              achievement["title"] as String,
+              achievement['title'] as String,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isUnlocked
@@ -177,7 +185,7 @@ class AchievementBadgesWidget extends StatelessWidget {
     Map<String, dynamic> achievement,
   ) {
     final theme = Theme.of(context);
-    final isUnlocked = achievement["isUnlocked"] as bool;
+    final isUnlocked = achievement['isUnlocked'] as bool;
 
     showDialog(
       context: context,
@@ -192,14 +200,14 @@ class AchievementBadgesWidget extends StatelessWidget {
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
                   color: isUnlocked
-                      ? achievement["color"] as Color
+                      ? achievement['color'] as Color
                       : theme.colorScheme.onSurfaceVariant.withValues(
                           alpha: 0.3,
                         ),
                   shape: BoxShape.circle,
                 ),
                 child: CustomIconWidget(
-                  iconName: achievement["iconName"] as String,
+                  iconName: achievement['iconName'] as String,
                   color: isUnlocked
                       ? Colors.white
                       : theme.colorScheme.onSurfaceVariant,
@@ -209,7 +217,7 @@ class AchievementBadgesWidget extends StatelessWidget {
               SizedBox(width: 3.w),
               Expanded(
                 child: Text(
-                  achievement["title"] as String,
+                  achievement['title'] as String,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -222,7 +230,7 @@ class AchievementBadgesWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                achievement["description"] as String,
+                achievement['description'] as String,
                 style: theme.textTheme.bodyMedium,
               ),
               SizedBox(height: 2.h),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 import 'package:todo_task_manager/presentation/auth/login_screen.dart';
 import 'package:todo_task_manager/presentation/auth/sign_up_screen.dart';
 
@@ -37,9 +38,14 @@ class AppRoutes {
     addEditTask: (context) {
       final args = ModalRoute.of(context)?.settings.arguments;
 
-      final taskMap = args is Map<String, dynamic> ? args : null;
+      // Handle Todo objects directly
+      if (args is Todo) {
+        return AddEditTask(initialTodo: args);
+      } else if (args is DateTime) {
+        return AddEditTask(selectedDate: args);
+      }
 
-      return AddEditTask(task: taskMap);
+      return const AddEditTask();
     },
 
     loginscreen: (context) => const LoginScreen(),

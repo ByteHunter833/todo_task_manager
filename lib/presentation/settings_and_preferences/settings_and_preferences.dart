@@ -23,7 +23,7 @@ class SettingsAndPreferences extends ConsumerStatefulWidget {
 class _SettingsAndPreferencesState
     extends ConsumerState<SettingsAndPreferences> {
   bool _isDarkMode = false;
-  String _selectedThemeColor = "blue";
+  String _selectedThemeColor = 'blue';
   // Notification settings
   bool _dueDateReminders = true;
   bool _overdueTaskAlerts = true;
@@ -31,33 +31,35 @@ class _SettingsAndPreferencesState
   TimeOfDay _quietHoursStart = const TimeOfDay(hour: 22, minute: 0);
   TimeOfDay _quietHoursEnd = const TimeOfDay(hour: 7, minute: 0);
   // Account settings
-  String _syncStatus = "Synced";
+  String _syncStatus = 'Synced';
   DateTime _lastSyncTime = DateTime.now().subtract(const Duration(minutes: 15));
-  final String _storageUsed = "2.3 MB";
+  final String _storageUsed = '2.3 MB';
   bool _isSigningOut = false;
   // Privacy settings
   bool _biometricAuth = false;
-  String _dataRetention = "1_year";
+  String _dataRetention = '1_year';
   bool _analyticsEnabled = true;
   // Language settings
-  String _currentLanguage = "en";
+  String _currentLanguage = 'en';
 
   // get userName
   String get userName {
     final currentUser = ref.read(currentUserProvider);
     final user = currentUser.value;
-    return user!.displayName!
-        .toLowerCase()
-        .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join(' ');
+    return user == null
+        ? 'Guest User'
+        : user.displayName!
+              .toLowerCase()
+              .split(' ')
+              .map((word) => word[0].toUpperCase() + word.substring(1))
+              .join(' ');
   }
 
   // get userEmail
-  String get userEmail {
+  String? get userEmail {
     final currentUser = ref.read(currentUserProvider);
     final user = currentUser.value;
-    return user!.email ?? 'No Email';
+    return user == null ? 'Not logged in' : user.email;
   }
 
   @override
@@ -202,7 +204,10 @@ class _SettingsAndPreferencesState
                   ),
                 ),
                 SizedBox(height: 0.5.h),
-                Text(userEmail, style: AppTheme.lightTheme.textTheme.bodySmall),
+                Text(
+                  userEmail ?? 'Not logged in',
+                  style: AppTheme.lightTheme.textTheme.bodySmall,
+                ),
                 SizedBox(height: 0.5.h),
                 Container(
                   padding: EdgeInsets.symmetric(
@@ -388,12 +393,12 @@ class _SettingsAndPreferencesState
 
   Future<void> _handleManualSync() async {
     setState(() {
-      _syncStatus = "Syncing";
+      _syncStatus = 'Syncing';
       _lastSyncTime = DateTime.now();
     });
     // Simulate sync process
     await Future.delayed(const Duration(seconds: 2));
-    setState(() => _syncStatus = "Synced");
+    setState(() => _syncStatus = 'Synced');
   }
 
   void _handleExportData(String format) {

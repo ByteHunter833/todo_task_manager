@@ -6,6 +6,8 @@ part 'todo.g.dart';
 class Todo {
   Id id = Isar.autoIncrement;
 
+  late String userId; // 👈 КЛЮЧЕВО
+
   late String title;
   String? description;
 
@@ -23,8 +25,8 @@ class Todo {
 
   DateTime? snoozedUntil;
 
-  // --- Added copyWith method ---
   Todo copyWith({
+    String? userId,
     String? title,
     String? description,
     TodoPriority? priority,
@@ -36,8 +38,8 @@ class Todo {
     DateTime? snoozedUntil,
   }) {
     return Todo()
-      ..id =
-          id // Keep the same ID for updates
+      ..id = id
+      ..userId = userId ?? this.userId
       ..title = title ?? this.title
       ..description = description ?? this.description
       ..priority = priority ?? this.priority

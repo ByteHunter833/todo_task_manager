@@ -27,11 +27,11 @@ class PrivacySectionWidget extends StatefulWidget {
 
 class _PrivacySectionWidgetState extends State<PrivacySectionWidget> {
   final List<Map<String, String>> retentionOptions = [
-    {"label": "1 Month", "value": "1_month"},
-    {"label": "3 Months", "value": "3_months"},
-    {"label": "6 Months", "value": "6_months"},
-    {"label": "1 Year", "value": "1_year"},
-    {"label": "Forever", "value": "forever"},
+    {'label': '1 Month', 'value': '1_month'},
+    {'label': '3 Months', 'value': '3_months'},
+    {'label': '6 Months', 'value': '6_months'},
+    {'label': '1 Year', 'value': '1_year'},
+    {'label': 'Forever', 'value': 'forever'},
   ];
 
   @override
@@ -112,7 +112,7 @@ class _PrivacySectionWidgetState extends State<PrivacySectionWidget> {
 
   Widget _buildDataRetentionTile() {
     final selectedOption = retentionOptions.firstWhere(
-      (option) => option["value"] == widget.dataRetention,
+      (option) => option['value'] == widget.dataRetention,
       orElse: () => retentionOptions.first,
     );
 
@@ -199,10 +199,10 @@ class _PrivacySectionWidgetState extends State<PrivacySectionWidget> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: retentionOptions.map((option) {
-            final isSelected = widget.dataRetention == option["value"];
+            final isSelected = widget.dataRetention == option['value'];
             return RadioListTile<String>(
-              title: Text(option["label"]!),
-              value: option["value"]!,
+              title: Text(option['label']!),
+              value: option['value']!,
               groupValue: widget.dataRetention,
               onChanged: (value) {
                 if (value != null) {

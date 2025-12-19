@@ -6,12 +6,14 @@ import '../../../core/app_export.dart';
 
 class TaskFormWidget extends StatefulWidget {
   final Todo? initialTodo;
+  final DateTime? selectedDate;
   final Function(Todo) onSave;
   final Function(bool)? onChanged;
 
   const TaskFormWidget({
     super.key,
     this.initialTodo,
+    this.selectedDate,
     required this.onSave,
     this.onChanged,
   });
@@ -27,13 +29,9 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
 
   String _selectedPriority = TodoPriority.medium.name.capitalize();
   String _selectedCategory = TodoCategory.work.name.capitalize();
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  late DateTime _selectedDate;
 
-  // Note: Isar Todo model doesn't have recurring fields, so we ignore them for saving
-  // but keep them in UI if you plan to add them later.
-  final bool _isRecurring = false;
-  final String _recurringInterval = 'Daily';
+  TimeOfDay _selectedTime = TimeOfDay.now();
 
   bool _isFormValid = false;
   late Map<String, dynamic> _initialFormValues;
@@ -47,7 +45,6 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
     'Education',
     'Finance',
   ];
-  final List<String> _recurringIntervals = ['Daily', 'Weekly', 'Monthly'];
 
   @override
   void initState() {
@@ -72,6 +69,8 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
         _selectedDate = DateTime.now();
         _selectedTime = TimeOfDay.now();
       }
+    } else {
+      _selectedDate = widget.selectedDate ?? DateTime.now();
     }
 
     _initialFormValues = _getCurrentFormValues();

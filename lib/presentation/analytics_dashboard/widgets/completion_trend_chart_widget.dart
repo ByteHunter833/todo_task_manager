@@ -1,14 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/providers/analytics_provider.dart';
 
 class CompletionTrendChartWidget extends StatefulWidget {
   final bool isWeeklyView;
+  final List<DailyStats>? dailyStats;
   final Function(bool) onViewToggle;
 
   const CompletionTrendChartWidget({
     super.key,
     required this.isWeeklyView,
+    this.dailyStats,
     required this.onViewToggle,
   });
 
@@ -19,27 +22,50 @@ class CompletionTrendChartWidget extends StatefulWidget {
 
 class _CompletionTrendChartWidgetState
     extends State<CompletionTrendChartWidget> {
-  final List<Map<String, dynamic>> weeklyData = [
-    {"day": "Mon", "completed": 8, "total": 12},
-    {"day": "Tue", "completed": 15, "total": 18},
-    {"day": "Wed", "completed": 12, "total": 15},
-    {"day": "Thu", "completed": 20, "total": 22},
-    {"day": "Fri", "completed": 18, "total": 20},
-    {"day": "Sat", "completed": 10, "total": 12},
-    {"day": "Sun", "completed": 6, "total": 8},
+  List<Map<String, dynamic>> _buildDataFromStats() {
+    if (widget.dailyStats == null || widget.dailyStats!.isEmpty) {
+      return [];
+    }
+
+    return widget.dailyStats!.map((stat) {
+      return {
+        'day': _formatDate(stat.date),
+        'completed': stat.completed,
+        'total': stat.total,
+        'rate': stat.completionRate,
+      };
+    }).toList();
+  }
+
+  String _formatDate(DateTime date) {
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[date.weekday % 7];
+  }
+
+  final List<Map<String, dynamic>> _defaultWeeklyData = [
+    {'day': 'Mon', 'completed': 8, 'total': 12},
+    {'day': 'Tue', 'completed': 15, 'total': 18},
+    {'day': 'Wed', 'completed': 12, 'total': 15},
+    {'day': 'Thu', 'completed': 20, 'total': 22},
+    {'day': 'Fri', 'completed': 18, 'total': 20},
+    {'day': 'Sat', 'completed': 10, 'total': 12},
+    {'day': 'Sun', 'completed': 6, 'total': 8},
   ];
 
-  final List<Map<String, dynamic>> monthlyData = [
-    {"week": "Week 1", "completed": 89, "total": 107},
-    {"week": "Week 2", "completed": 95, "total": 110},
-    {"week": "Week 3", "completed": 78, "total": 95},
-    {"week": "Week 4", "completed": 102, "total": 115},
+  final List<Map<String, dynamic>> _defaultMonthlyData = [
+    {'week': 'Week 1', 'completed': 89, 'total': 107},
+    {'week': 'Week 2', 'completed': 95, 'total': 110},
+    {'week': 'Week 3', 'completed': 78, 'total': 95},
+    {'week': 'Week 4', 'completed': 102, 'total': 115},
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final data = widget.isWeeklyView ? weeklyData : monthlyData;
+    final statsData = _buildDataFromStats();
+    final data = statsData.isNotEmpty
+        ? statsData
+        : (widget.isWeeklyView ? _defaultWeeklyData : _defaultMonthlyData);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w),
@@ -158,8 +184,8 @@ class _CompletionTrendChartWidgetState
                         final index = value.toInt();
                         if (index >= 0 && index < data.length) {
                           final label = widget.isWeeklyView
-                              ? (data[index]["day"] as String).substring(0, 1)
-                              : "W${index + 1}";
+                              ? (data[index]['day'] as String).substring(0, 1)
+                              : 'W${index + 1}';
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
                             child: Text(
@@ -206,7 +232,7 @@ class _CompletionTrendChartWidgetState
                     spots: data.asMap().entries.map((entry) {
                       return FlSpot(
                         entry.key.toDouble(),
-                        (entry.value["completed"] as int).toDouble(),
+                        (entry.value['completed'] as int).toDouble(),
                       );
                     }).toList(),
                     isCurved: true,
@@ -249,11 +275,11 @@ class _CompletionTrendChartWidgetState
                     getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                       return touchedBarSpots.map((barSpot) {
                         final index = barSpot.x.toInt();
-                        final completed = data[index]["completed"];
-                        final total = data[index]["total"];
+                        final completed = data[index]['completed'];
+                        final total = data[index]['total'];
                         final label = widget.isWeeklyView
-                            ? data[index]["day"]
-                            : data[index]["week"];
+                            ? data[index]['day']
+                            : data[index]['week'];
 
                         return LineTooltipItem(
                           '$label\n$completed/$total tasks',

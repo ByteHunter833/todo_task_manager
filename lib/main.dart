@@ -27,7 +27,6 @@ void main() async {
     return CustomErrorWidget(errorDetails: details);
   };
 
-  // Инициализация Isar здесь
   await initializeIsar();
 
   Future.wait([

@@ -3,17 +3,25 @@ import 'package:todo_task_manager/core/data/models/todo.dart';
 
 class TodoRepository {
   final Isar isar;
-  TodoRepository(this.isar);
+  final String userId;
+
+  TodoRepository(this.isar, this.userId);
 
   Stream<List<Todo>> watchAll() {
-    return isar.todos.where().watch(fireImmediately: true);
+    return isar.todos
+        .filter()
+        .userIdEqualTo(userId)
+        .watch(fireImmediately: true);
   }
 
   Future<void> add(Todo todo) async {
+    todo.userId = userId; // 👈 гарантируем владельца
     await isar.writeTxn(() => isar.todos.put(todo));
   }
 
   Future<void> toggle(Todo todo) async {
+    if (todo.userId != userId) return; // защита от сюрпризов
+
     await isar.writeTxn(() {
       todo.isCompleted = !todo.isCompleted;
       todo.completedAt = todo.isCompleted ? DateTime.now() : null;
@@ -22,6 +30,9 @@ class TodoRepository {
   }
 
   Future<void> delete(Id id) async {
+    final todo = await isar.todos.get(id);
+    if (todo == null || todo.userId != userId) return;
+
     await isar.writeTxn(() => isar.todos.delete(id));
   }
 }

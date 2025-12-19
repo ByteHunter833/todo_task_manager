@@ -24,12 +24,12 @@ class AppearanceSectionWidget extends StatefulWidget {
 
 class _AppearanceSectionWidgetState extends State<AppearanceSectionWidget> {
   final List<Map<String, dynamic>> themeColors = [
-    {"name": "Blue", "color": const Color(0xFF2563EB), "value": "blue"},
-    {"name": "Purple", "color": const Color(0xFF8B5CF6), "value": "purple"},
-    {"name": "Green", "color": const Color(0xFF059669), "value": "green"},
-    {"name": "Orange", "color": const Color(0xFFD97706), "value": "orange"},
-    {"name": "Red", "color": const Color(0xFFDC2626), "value": "red"},
-    {"name": "Teal", "color": const Color(0xFF0891B2), "value": "teal"},
+    {'name': 'Blue', 'color': const Color(0xFF2563EB), 'value': 'blue'},
+    {'name': 'Purple', 'color': const Color(0xFF8B5CF6), 'value': 'purple'},
+    {'name': 'Green', 'color': const Color(0xFF059669), 'value': 'green'},
+    {'name': 'Orange', 'color': const Color(0xFFD97706), 'value': 'orange'},
+    {'name': 'Red', 'color': const Color(0xFFDC2626), 'value': 'red'},
+    {'name': 'Teal', 'color': const Color(0xFF0891B2), 'value': 'teal'},
   ];
 
   @override
@@ -127,14 +127,14 @@ class _AppearanceSectionWidgetState extends State<AppearanceSectionWidget> {
             runSpacing: 2.h,
             children: themeColors.map((colorData) {
               final isSelected =
-                  widget.selectedThemeColor == colorData["value"];
+                  widget.selectedThemeColor == colorData['value'];
               return GestureDetector(
-                onTap: () => widget.onThemeColorChanged(colorData["value"]),
+                onTap: () => widget.onThemeColorChanged(colorData['value']),
                 child: Container(
                   width: 20.w,
                   height: 8.h,
                   decoration: BoxDecoration(
-                    color: colorData["color"],
+                    color: colorData['color'],
                     borderRadius: BorderRadius.circular(8),
                     border: isSelected
                         ? Border.all(
@@ -144,7 +144,7 @@ class _AppearanceSectionWidgetState extends State<AppearanceSectionWidget> {
                         : null,
                     boxShadow: [
                       BoxShadow(
-                        color: colorData["color"].withValues(alpha: 0.3),
+                        color: colorData['color'].withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -161,7 +161,7 @@ class _AppearanceSectionWidgetState extends State<AppearanceSectionWidget> {
                         ),
                       SizedBox(height: 0.5.h),
                       Text(
-                        colorData["name"],
+                        colorData['name'],
                         style: AppTheme.lightTheme.textTheme.labelSmall
                             ?.copyWith(
                               color: Colors.white,

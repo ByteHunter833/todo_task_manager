@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../core/data/models/todo.dart';
+import '../../providers/todo_provider.dart';
 import './widgets/calendar_header_widget.dart';
 import './widgets/calendar_month_widget.dart';
 import './widgets/calendar_week_widget.dart';
 import './widgets/daily_tasks_bottom_sheet.dart';
 
-class CalendarView extends StatefulWidget {
+class CalendarView extends ConsumerStatefulWidget {
   const CalendarView({super.key});
 
   @override
-  State<CalendarView> createState() => _CalendarViewState();
+  ConsumerState<CalendarView> createState() => _CalendarViewState();
 }
 
-class _CalendarViewState extends State<CalendarView>
+class _CalendarViewState extends ConsumerState<CalendarView>
     with TickerProviderStateMixin {
   late PageController _monthPageController;
   late PageController _weekPageController;
@@ -25,9 +28,7 @@ class _CalendarViewState extends State<CalendarView>
   DateTime _selectedDate = DateTime.now();
   bool _isWeekView = false;
   bool _isRefreshing = false;
-
-  // Mock task data
-  final Map<DateTime, List<Map<String, dynamic>>> _tasksByDate = {};
+  Map<DateTime, List<Map<String, dynamic>>> _tasksByDate = {};
 
   @override
   void initState() {
@@ -38,7 +39,6 @@ class _CalendarViewState extends State<CalendarView>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _generateMockTasks();
   }
 
   @override
@@ -49,100 +49,63 @@ class _CalendarViewState extends State<CalendarView>
     super.dispose();
   }
 
-  void _generateMockTasks() {
-    final now = DateTime.now();
-    final tasks = [
-      {
-        'id': 1,
-        'title': 'Team Meeting',
-        'description': 'Weekly team sync and project updates',
-        'time': '09:00',
-        'priority': 'High',
-        'category': 'Work',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day),
-      },
-      {
-        'id': 2,
-        'title': 'Grocery Shopping',
-        'description': 'Buy vegetables, fruits, and household items',
-        'time': '14:30',
-        'priority': 'Medium',
-        'category': 'Shopping',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day),
-      },
-      {
-        'id': 3,
-        'title': 'Doctor Appointment',
-        'description': 'Annual health checkup',
-        'time': '11:00',
-        'priority': 'High',
-        'category': 'Health',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day + 1),
-      },
-      {
-        'id': 4,
-        'title': 'Project Deadline',
-        'description': 'Submit final project deliverables',
-        'time': '17:00',
-        'priority': 'High',
-        'category': 'Work',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day + 2),
-      },
-      {
-        'id': 5,
-        'title': 'Gym Workout',
-        'description': 'Cardio and strength training session',
-        'time': '07:00',
-        'priority': 'Medium',
-        'category': 'Health',
-        'isCompleted': true,
-        'date': DateTime(now.year, now.month, now.day - 1),
-      },
-      {
-        'id': 6,
-        'title': 'Family Dinner',
-        'description': 'Dinner with parents and siblings',
-        'time': '19:00',
-        'priority': 'Low',
-        'category': 'Personal',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day + 3),
-      },
-      {
-        'id': 7,
-        'title': 'Code Review',
-        'description': 'Review pull requests and provide feedback',
-        'time': '15:30',
-        'priority': 'Medium',
-        'category': 'Work',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day + 1),
-      },
-      {
-        'id': 8,
-        'title': 'Book Reading',
-        'description': 'Read chapter 5-7 of productivity book',
-        'time': '21:00',
-        'priority': 'Low',
-        'category': 'Personal',
-        'isCompleted': false,
-        'date': DateTime(now.year, now.month, now.day),
-      },
-    ];
-
-    for (final task in tasks) {
-      final date = task['date'] as DateTime;
-      final dateKey = DateTime(date.year, date.month, date.day);
-
-      if (_tasksByDate[dateKey] == null) {
-        _tasksByDate[dateKey] = [];
-      }
-      _tasksByDate[dateKey]!.add(task);
+  String _priorityToString(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.high:
+        return 'High';
+      case TodoPriority.medium:
+        return 'Medium';
+      case TodoPriority.low:
+        return 'Low';
     }
+  }
+
+  String _categoryToString(TodoCategory category) {
+    switch (category) {
+      case TodoCategory.work:
+        return 'Work';
+      case TodoCategory.personal:
+        return 'Personal';
+      case TodoCategory.health:
+        return 'Health';
+      case TodoCategory.shopping:
+        return 'Shopping';
+      case TodoCategory.education:
+        return 'Education';
+      case TodoCategory.finance:
+        return 'Finance';
+    }
+  }
+
+  Map<DateTime, List<Map<String, dynamic>>> _groupTodosByDate(
+    List<Todo> todos,
+  ) {
+    final tasksByDate = <DateTime, List<Map<String, dynamic>>>{};
+
+    for (final todo in todos) {
+      if (todo.dueDate == null) continue;
+
+      final dateKey = DateTime(
+        todo.dueDate!.year,
+        todo.dueDate!.month,
+        todo.dueDate!.day,
+      );
+
+      tasksByDate.putIfAbsent(dateKey, () => []).add({
+        'id': todo.id,
+        'title': todo.title,
+        'description': todo.description ?? '',
+        'time': todo.dueDate != null
+            ? '${todo.dueDate!.hour.toString().padLeft(2, '0')}:${todo.dueDate!.minute.toString().padLeft(2, '0')}'
+            : 'No time',
+        'priority': _priorityToString(todo.priority),
+        'category': _categoryToString(todo.category),
+        'isCompleted': todo.isCompleted,
+        'todo': todo,
+      });
+    }
+
+    return tasksByDate;
   }
 
   void _onDateSelected(DateTime date) {
@@ -256,16 +219,18 @@ class _CalendarViewState extends State<CalendarView>
 
   void _onTaskTap(Map<String, dynamic> task) {
     Navigator.pop(context);
-    Navigator.pushNamed(context, '/add-edit-task', arguments: task);
+    if (task['todo'] != null) {
+      Navigator.pushNamed(
+        context,
+        '/add-edit-task',
+        arguments: task['todo'] as Todo,
+      );
+    }
   }
 
   void _navigateToAddTask(DateTime? date) {
     Navigator.pop(context);
-    Navigator.pushNamed(
-      context,
-      '/add-edit-task',
-      arguments: {'selectedDate': date ?? _selectedDate},
-    );
+    Navigator.pushNamed(context, '/add-edit-task', arguments: date);
   }
 
   void _navigateToTimeline() {
@@ -274,34 +239,61 @@ class _CalendarViewState extends State<CalendarView>
 
   @override
   Widget build(BuildContext context) {
+    final todosAsyncValue = ref.watch(todosStreamProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            CalendarHeaderWidget(
-              currentMonth: _currentMonth,
-              isWeekView: _isWeekView,
-              onPreviousMonth: _onPreviousMonth,
-              onNextMonth: _onNextMonth,
-              onTodayPressed: _onTodayPressed,
-              onViewToggle: _onViewToggle,
+      body: todosAsyncValue.when(
+        data: (todos) {
+          _tasksByDate = _groupTodosByDate(todos);
+
+          return SafeArea(
+            child: Column(
+              children: [
+                CalendarHeaderWidget(
+                  currentMonth: _currentMonth,
+                  isWeekView: _isWeekView,
+                  onPreviousMonth: _onPreviousMonth,
+                  onNextMonth: _onNextMonth,
+                  onTodayPressed: _onTodayPressed,
+                  onViewToggle: _onViewToggle,
+                ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    color: AppTheme.lightTheme.primaryColor,
+                    child: _isWeekView
+                        ? _buildWeekView(_tasksByDate)
+                        : _buildMonthView(_tasksByDate),
+                  ),
+                ),
+                _buildBottomActions(),
+              ],
             ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _onRefresh,
-                color: AppTheme.lightTheme.primaryColor,
-                child: _isWeekView ? _buildWeekView() : _buildMonthView(),
+          );
+        },
+        loading: () => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              SizedBox(height: 2.h),
+              Text(
+                'Loading tasks...',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ),
-            _buildBottomActions(),
-          ],
+            ],
+          ),
         ),
+        error: (error, stack) =>
+            Center(child: Text('Error loading tasks: $error')),
       ),
     );
   }
 
-  Widget _buildMonthView() {
+  Widget _buildMonthView(
+    Map<DateTime, List<Map<String, dynamic>>> tasksByDate,
+  ) {
     return PageView.builder(
       controller: _monthPageController,
       onPageChanged: (index) {
@@ -319,7 +311,7 @@ class _CalendarViewState extends State<CalendarView>
         return CalendarMonthWidget(
           currentMonth: month,
           selectedDate: _selectedDate,
-          tasksByDate: _tasksByDate,
+          tasksByDate: tasksByDate,
           onDateSelected: _onDateSelected,
           onDateLongPressed: _onDateLongPressed,
         );
@@ -327,7 +319,7 @@ class _CalendarViewState extends State<CalendarView>
     );
   }
 
-  Widget _buildWeekView() {
+  Widget _buildWeekView(Map<DateTime, List<Map<String, dynamic>>> tasksByDate) {
     return PageView.builder(
       controller: _weekPageController,
       onPageChanged: (index) {
@@ -349,7 +341,7 @@ class _CalendarViewState extends State<CalendarView>
         return CalendarWeekWidget(
           selectedWeek: selectedWeek,
           selectedDate: _selectedDate,
-          tasksByDate: _tasksByDate,
+          tasksByDate: tasksByDate,
           onDateSelected: _onDateSelected,
           onDateLongPressed: _onDateLongPressed,
         );

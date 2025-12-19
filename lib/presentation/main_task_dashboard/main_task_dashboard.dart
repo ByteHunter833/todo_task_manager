@@ -56,29 +56,21 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
     return Future.delayed(const Duration(milliseconds: 500));
   }
 
-  void _onTaskTap(Map<String, dynamic> taskMap) {
+  void _onTaskTap(Todo todo) {
     HapticFeedback.lightImpact();
 
-    Navigator.pushNamed(context, '/add-edit-task', arguments: taskMap);
+    Navigator.pushNamed(context, '/add-edit-task', arguments: todo);
   }
 
-  void _onTaskComplete(Map<String, dynamic> taskMap) {
+  void _onTaskComplete(Todo todo) {
     HapticFeedback.mediumImpact();
-
-    final int id = taskMap['id'];
-
-    final todos = ref.read(todosStreamProvider).value;
-    final todoToToggle = todos?.firstWhere((element) => element.id == id);
-
-    if (todoToToggle != null) {
-      ref.read(todoRepositoryProvider).toggle(todoToToggle);
-    }
+    ref.read(todoRepositoryProvider).toggle(todo);
   }
 
-  void _onTaskDelete(Map<String, dynamic> taskMap) {
+  void _onTaskDelete(Todo todo) {
     HapticFeedback.heavyImpact();
-    final int id = taskMap['id'];
-    final String title = taskMap['title'];
+    final int id = todo.id;
+    final String title = todo.title;
 
     ref.read(todoRepositoryProvider).delete(id);
 
@@ -87,9 +79,9 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
     ).showSnackBar(SnackBar(content: Text('Task "$title" deleted')));
   }
 
-  void _onTaskEdit(Map<String, dynamic> taskMap) {
+  void _onTaskEdit(Todo todo) {
     HapticFeedback.lightImpact();
-    Navigator.pushNamed(context, '/add-edit-task', arguments: taskMap);
+    Navigator.pushNamed(context, '/add-edit-task', arguments: todo);
   }
 
   void _onSearchTap() {
@@ -107,32 +99,18 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
     Navigator.pushNamed(context, '/add-edit-task');
   }
 
+  bool _isSameDay(DateTime? date, DateTime today) {
+    if (date == null) return false;
+    return date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+  }
+
   void _onVoiceInput() {
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Voice input feature coming soon!')),
     );
-  }
-
-  Map<String, dynamic> _todoToMap(Todo todo) {
-    return {
-      "id": todo.id,
-      "title": todo.title,
-      "description": todo.description ?? '',
-      "priority":
-          todo.priority.name[0].toUpperCase() +
-          todo.priority.name.substring(1), // Capitalize
-      "category": todo.category.name,
-      "dueDate": todo.dueDate,
-      "isCompleted": todo.isCompleted,
-      "createdAt": todo.createdAt,
-      "modifiedAt": DateTime.now(), // Mock
-    };
-  }
-
-  bool _isSameDay(DateTime? d1, DateTime d2) {
-    if (d1 == null) return false;
-    return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
   }
 
   @override
@@ -186,14 +164,11 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
                 .where((t) => t.isCompleted)
                 .toList();
 
-            // Converting to Maps for Widgets
-            final overdueMaps = overdueTodos.map(_todoToMap).toList();
-            final todayMaps = todayTodos.map(_todoToMap).toList();
-            final upcomingMaps = upcomingTodos.map(_todoToMap).toList();
-            final completedMaps = completedTodos
-                .take(5)
-                .map(_todoToMap)
-                .toList();
+            // Preparing task lists
+            final overduetodosList = overdueTodos;
+            final todaytodosList = todayTodos;
+            final upcomingtodosList = upcomingTodos;
+            final completedtodosList = completedTodos.take(5).toList();
 
             // Statistics Calculation
             final totalTasksForToday =
@@ -248,10 +223,10 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
                   ),
                   SliverList(
                     delegate: SliverChildListDelegate([
-                      overdueMaps.isNotEmpty
+                      overduetodosList.isNotEmpty
                           ? TaskSectionWidget(
                               title: 'Overdue',
-                              tasks: overdueMaps,
+                              tasks: overduetodosList,
                               accentColor: const Color(0xFFDC2626),
                               onTaskTap: _onTaskTap,
                               onTaskComplete: _onTaskComplete,
@@ -259,10 +234,10 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
                               onTaskEdit: _onTaskEdit,
                             )
                           : const SizedBox.shrink(),
-                      todayMaps.isNotEmpty
+                      todaytodosList.isNotEmpty
                           ? TaskSectionWidget(
                               title: 'Today',
-                              tasks: todayMaps,
+                              tasks: todaytodosList,
                               accentColor:
                                   AppTheme.lightTheme.colorScheme.primary,
                               onTaskTap: _onTaskTap,
@@ -271,10 +246,10 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
                               onTaskEdit: _onTaskEdit,
                             )
                           : const SizedBox.shrink(),
-                      upcomingMaps.isNotEmpty
+                      upcomingtodosList.isNotEmpty
                           ? TaskSectionWidget(
                               title: 'Upcoming',
-                              tasks: upcomingMaps,
+                              tasks: upcomingtodosList,
                               accentColor: const Color(0xFFD97706),
                               onTaskTap: _onTaskTap,
                               onTaskComplete: _onTaskComplete,
@@ -282,10 +257,10 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
                               onTaskEdit: _onTaskEdit,
                             )
                           : const SizedBox.shrink(),
-                      completedMaps.isNotEmpty
+                      completedtodosList.isNotEmpty
                           ? TaskSectionWidget(
                               title: 'Recently Completed',
-                              tasks: completedMaps,
+                              tasks: completedtodosList,
                               accentColor: const Color(0xFF059669),
                               onTaskTap: _onTaskTap,
                               onTaskComplete: _onTaskComplete,

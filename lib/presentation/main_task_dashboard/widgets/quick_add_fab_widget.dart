@@ -87,7 +87,7 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
                 child: Opacity(
                   opacity: _expandAnimation.value,
                   child: FloatingActionButton(
-                    heroTag: "voice_fab",
+                    heroTag: 'voice_fab',
                     onPressed: () => _onActionTap(widget.onVoiceInput),
                     backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
                     child: const CustomIconWidget(
@@ -113,7 +113,7 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
                 child: Opacity(
                   opacity: _expandAnimation.value,
                   child: FloatingActionButton(
-                    heroTag: "add_fab",
+                    heroTag: 'add_fab',
                     onPressed: () => _onActionTap(widget.onAddTask),
                     backgroundColor: AppTheme.lightTheme.colorScheme.primary,
                     child: const CustomIconWidget(
@@ -130,7 +130,7 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
 
         // Main FAB
         FloatingActionButton(
-          heroTag: "main_fab",
+          heroTag: 'main_fab',
           onPressed: _toggleExpanded,
           backgroundColor: _isExpanded
               ? AppTheme.lightTheme.colorScheme.surface

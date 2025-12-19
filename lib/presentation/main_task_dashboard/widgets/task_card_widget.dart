@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 
 import '../../../core/app_export.dart';
 
 class TaskCardWidget extends StatelessWidget {
-  final Map<String, dynamic> task;
+  final Todo task;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onDelete;
@@ -128,6 +129,34 @@ class TaskCardWidget extends StatelessWidget {
     );
   }
 
+  String _priorityToString(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.high:
+        return 'High';
+      case TodoPriority.medium:
+        return 'Medium';
+      case TodoPriority.low:
+        return 'Low';
+    }
+  }
+
+  String _categoryToString(TodoCategory category) {
+    switch (category) {
+      case TodoCategory.work:
+        return 'Work';
+      case TodoCategory.personal:
+        return 'Personal';
+      case TodoCategory.health:
+        return 'Health';
+      case TodoCategory.shopping:
+        return 'Shopping';
+      case TodoCategory.education:
+        return 'Education';
+      case TodoCategory.finance:
+        return 'Finance';
+    }
+  }
+
   Widget _buildContextMenuItem(
     BuildContext context,
     String title,
@@ -165,15 +194,15 @@ class TaskCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = task['title'] as String? ?? 'Untitled Task';
-    final description = task['description'] as String? ?? '';
-    final priority = task['priority'] as String? ?? 'medium';
-    final category = task['category'] as String? ?? 'personal';
-    final dueDate = task['dueDate'] as DateTime?;
-    final isCompleted = task['isCompleted'] as bool? ?? false;
+    final title = task.title;
+    final description = task.description;
+    final priority = task.priority;
+    final category = task.category;
+    final dueDate = task.dueDate;
+    final isCompleted = task.isCompleted;
 
     return Dismissible(
-      key: Key(task['id'].toString()),
+      key: Key(task.id.toString()),
       background: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF059669),
@@ -289,7 +318,7 @@ class TaskCardWidget extends StatelessWidget {
                 width: 4,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: _getPriorityColor(priority),
+                  color: _getPriorityColor(_priorityToString(priority)),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -326,7 +355,7 @@ class TaskCardWidget extends StatelessWidget {
                         SizedBox(width: 2.w),
                         CustomIconWidget(
                           iconName: _getCategoryIcon(
-                            category,
+                            _categoryToString(category),
                           ).toString().split('.').last,
                           color:
                               AppTheme.lightTheme.colorScheme.onSurfaceVariant,
@@ -334,7 +363,7 @@ class TaskCardWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    description.isNotEmpty
+                    description!.isNotEmpty
                         ? SizedBox(height: 0.5.h)
                         : const SizedBox.shrink(),
                     description.isNotEmpty
@@ -390,18 +419,20 @@ class TaskCardWidget extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: _getPriorityColor(
-                                    priority,
+                                    _priorityToString(priority),
                                   ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  priority.toUpperCase(),
+                                  _priorityToString(priority).toUpperCase(),
                                   style: AppTheme
                                       .lightTheme
                                       .textTheme
                                       .labelSmall
                                       ?.copyWith(
-                                        color: _getPriorityColor(priority),
+                                        color: _getPriorityColor(
+                                          _priorityToString(priority),
+                                        ),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 10.sp,
                                       ),

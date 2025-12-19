@@ -13,32 +13,32 @@ class ProductivityInsightsWidget extends StatelessWidget {
 
     final List<Map<String, dynamic>> insights = [
       {
-        "title": "Most Productive Day",
-        "value": "Thursday",
-        "description": "You complete 25% more tasks on Thursdays",
-        "iconName": "calendar_today",
-        "color": const Color(0xFF059669),
+        'title': 'Most Productive Day',
+        'value': 'Thursday',
+        'description': 'You complete 25% more tasks on Thursdays',
+        'iconName': 'calendar_today',
+        'color': const Color(0xFF059669),
       },
       {
-        "title": "Peak Completion Time",
-        "value": "10:00 AM",
-        "description": "Your highest task completion rate occurs at 10 AM",
-        "iconName": "schedule",
-        "color": const Color(0xFF2563EB),
+        'title': 'Peak Completion Time',
+        'value': '10:00 AM',
+        'description': 'Your highest task completion rate occurs at 10 AM',
+        'iconName': 'schedule',
+        'color': const Color(0xFF2563EB),
       },
       {
-        "title": "Top Category",
-        "value": "Work Tasks",
-        "description": "45% of your completed tasks are work-related",
-        "iconName": "work",
-        "color": const Color(0xFF8B5CF6),
+        'title': 'Top Category',
+        'value': 'Work Tasks',
+        'description': '45% of your completed tasks are work-related',
+        'iconName': 'work',
+        'color': const Color(0xFF8B5CF6),
       },
       {
-        "title": "Completion Streak",
-        "value": "12 Days",
-        "description": "Current streak of completing daily goals",
-        "iconName": "local_fire_department",
-        "color": const Color(0xFFD97706),
+        'title': 'Completion Streak',
+        'value': '12 Days',
+        'description': 'Current streak of completing daily goals',
+        'iconName': 'local_fire_department',
+        'color': const Color(0xFFD97706),
       },
     ];
 
@@ -83,12 +83,12 @@ class ProductivityInsightsWidget extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(2.w),
             decoration: BoxDecoration(
-              color: (insight["color"] as Color).withValues(alpha: 0.1),
+              color: (insight['color'] as Color).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: CustomIconWidget(
-              iconName: insight["iconName"] as String,
-              color: insight["color"] as Color,
+              iconName: insight['iconName'] as String,
+              color: insight['color'] as Color,
               size: 20,
             ),
           ),
@@ -102,7 +102,7 @@ class ProductivityInsightsWidget extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        insight["title"] as String,
+                        insight['title'] as String,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -111,17 +111,17 @@ class ProductivityInsightsWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      insight["value"] as String,
+                      insight['value'] as String,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: insight["color"] as Color,
+                        color: insight['color'] as Color,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
-                  insight["description"] as String,
+                  insight['description'] as String,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

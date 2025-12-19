@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:todo_task_manager/core/data/models/todo.dart';
 
 class CategoryBreakdownChartWidget extends StatefulWidget {
-  const CategoryBreakdownChartWidget({super.key});
+  final Map<TodoCategory, int>? categoryBreakdown;
+
+  const CategoryBreakdownChartWidget({super.key, this.categoryBreakdown});
 
   @override
   State<CategoryBreakdownChartWidget> createState() =>
@@ -14,17 +17,75 @@ class _CategoryBreakdownChartWidgetState
     extends State<CategoryBreakdownChartWidget> {
   int touchedIndex = -1;
 
-  final List<Map<String, dynamic>> categoryData = [
-    {"name": "Work", "value": 45, "color": const Color(0xFF2563EB)},
-    {"name": "Personal", "value": 25, "color": const Color(0xFF059669)},
-    {"name": "Shopping", "value": 15, "color": const Color(0xFFD97706)},
-    {"name": "Health", "value": 10, "color": const Color(0xFF8B5CF6)},
-    {"name": "Others", "value": 5, "color": const Color(0xFFDC2626)},
-  ];
+  static const Map<TodoCategory, Color> _categoryColors = {
+    TodoCategory.work: Color(0xFF2563EB),
+    TodoCategory.personal: Color(0xFF059669),
+    TodoCategory.shopping: Color(0xFFD97706),
+    TodoCategory.health: Color(0xFF8B5CF6),
+    TodoCategory.education: Color(0xFFF59E0B),
+    TodoCategory.finance: Color(0xFFDC2626),
+  };
+
+  static const Map<TodoCategory, String> _categoryNames = {
+    TodoCategory.work: 'Work',
+    TodoCategory.personal: 'Personal',
+    TodoCategory.shopping: 'Shopping',
+    TodoCategory.health: 'Health',
+    TodoCategory.education: 'Education',
+    TodoCategory.finance: 'Finance',
+  };
+
+  List<Map<String, dynamic>> _buildCategoryData() {
+    if (widget.categoryBreakdown == null || widget.categoryBreakdown!.isEmpty) {
+      return [
+        {
+          'name': 'Work',
+          'value': 45,
+          'color': _categoryColors[TodoCategory.work],
+        },
+        {
+          'name': 'Personal',
+          'value': 25,
+          'color': _categoryColors[TodoCategory.personal],
+        },
+        {
+          'name': 'Shopping',
+          'value': 15,
+          'color': _categoryColors[TodoCategory.shopping],
+        },
+        {
+          'name': 'Health',
+          'value': 10,
+          'color': _categoryColors[TodoCategory.health],
+        },
+        {
+          'name': 'Education',
+          'value': 3,
+          'color': _categoryColors[TodoCategory.education],
+        },
+        {
+          'name': 'Finance',
+          'value': 2,
+          'color': _categoryColors[TodoCategory.finance],
+        },
+      ];
+    }
+
+    return widget.categoryBreakdown!.entries
+        .map(
+          (entry) => {
+            'name': _categoryNames[entry.key] ?? 'Unknown',
+            'value': entry.value,
+            'color': _categoryColors[entry.key] ?? Colors.grey,
+          },
+        )
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final categoryData = _buildCategoryData();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w),
@@ -84,8 +145,8 @@ class _CategoryBreakdownChartWidgetState
                         final radius = isTouched ? 12.w : 10.w;
 
                         return PieChartSectionData(
-                          color: data["color"] as Color,
-                          value: (data["value"] as int).toDouble(),
+                          color: data['color'] as Color,
+                          value: (data['value'] as int).toDouble(),
                           title: '${data["value"]}%',
                           radius: radius,
                           titleStyle: TextStyle(
@@ -107,7 +168,7 @@ class _CategoryBreakdownChartWidgetState
                                     ],
                                   ),
                                   child: Text(
-                                    data["name"] as String,
+                                    data['name'] as String,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: theme.colorScheme.onSurface,
@@ -136,7 +197,7 @@ class _CategoryBreakdownChartWidgetState
                             width: 3.w,
                             height: 3.w,
                             decoration: BoxDecoration(
-                              color: data["color"] as Color,
+                              color: data['color'] as Color,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -146,7 +207,7 @@ class _CategoryBreakdownChartWidgetState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  data["name"] as String,
+                                  data['name'] as String,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),

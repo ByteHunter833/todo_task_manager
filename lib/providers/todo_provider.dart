@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:todo_task_manager/core/data/models/todo.dart';
 import 'package:todo_task_manager/core/data/repository/todo_repositroy.dart';
+import 'package:todo_task_manager/providers/auth_provider.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError(
@@ -12,7 +13,10 @@ final isarProvider = Provider<Isar>((ref) {
 });
 
 final todoRepositoryProvider = Provider<TodoRepository>((ref) {
-  return TodoRepository(ref.watch(isarProvider));
+  return TodoRepository(
+    ref.watch(isarProvider),
+    ref.watch(currentUserProvider).value!.uid,
+  );
 });
 
 final todosStreamProvider = StreamProvider<List<Todo>>((ref) {
