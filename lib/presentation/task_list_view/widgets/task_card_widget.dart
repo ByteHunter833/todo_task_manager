@@ -116,256 +116,191 @@ class TaskCardWidget extends StatelessWidget {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final isCompleted = task.isCompleted as bool? ?? false;
     final title = task.title as String? ?? 'Untitled Task';
     final description = task.description ?? '';
     final isOverdue = _isOverdue();
 
-    return Dismissible(
-      key: Key('task_${task.id}'),
-      background: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-        decoration: BoxDecoration(
-          color: Colors.green.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        alignment: Alignment.centerLeft,
-        padding: EdgeInsets.only(left: 6.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CustomIconWidget(
-              iconName: 'check_circle',
-              color: Colors.white,
-              size: 24,
-            ),
-            SizedBox(height: 0.5.h),
-            Text(
-              'Complete',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        color: isCompleted
+            ? AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.7)
+            : AppTheme.lightTheme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: isOverdue
+            ? Border.all(
+                color: AppTheme.lightTheme.colorScheme.error.withValues(
+                  alpha: 0.3,
+                ),
+                width: 1,
+              )
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      secondaryBackground: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-        decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.error.withValues(alpha: 0.8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-        ),
-        alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 6.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CustomIconWidget(
-              iconName: 'delete',
-              color: Colors.white,
-              size: 24,
-            ),
-            SizedBox(height: 0.5.h),
-            Text(
-              'Delete',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-      onDismissed: (direction) {
-        if (direction == DismissDirection.startToEnd) {
-          onComplete?.call();
-        } else {
-          onDelete?.call();
-        }
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-        decoration: BoxDecoration(
-          color: isCompleted
-              ? AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.7)
-              : AppTheme.lightTheme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: isOverdue
-              ? Border.all(
-                  color: AppTheme.lightTheme.colorScheme.error.withValues(
-                    alpha: 0.3,
-                  ),
-                  width: 1,
-                )
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: isCompleted
-                                ? AppTheme.lightTheme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6)
-                                : AppTheme.lightTheme.colorScheme.onSurface,
-                            decoration: isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+          child: Padding(
+            padding: EdgeInsets.all(4.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: isCompleted
+                              ? AppTheme.lightTheme.colorScheme.onSurface
+                                    .withValues(alpha: 0.6)
+                              : AppTheme.lightTheme.colorScheme.onSurface,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(width: 2.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 2.w,
-                          vertical: 0.5.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getPriorityColor().withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _getPriorityName(),
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w500,
-                            color: _getPriorityColor(),
-                          ),
-                        ),
-                      ),
-                      if (isCompleted) ...[
-                        SizedBox(width: 2.w),
-                        const CustomIconWidget(
-                          iconName: 'check_circle',
-                          color: Colors.green,
-                          size: 20,
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (description.isNotEmpty) ...[
-                    SizedBox(height: 1.h),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: isCompleted
-                            ? AppTheme.lightTheme.colorScheme.onSurface
-                                  .withValues(alpha: 0.5)
-                            : AppTheme.lightTheme.colorScheme.onSurface
-                                  .withValues(alpha: 0.7),
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  SizedBox(height: 2.h),
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 2.w,
-                          vertical: 0.5.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getCategoryColor().withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomIconWidget(
-                              iconName: _getCategoryIcon(),
-                              color: _getCategoryColor(),
-                              size: 14,
-                            ),
-                            SizedBox(width: 1.w),
-                            Text(
-                              _getCategoryName(),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
-                                color: _getCategoryColor(),
-                              ),
-                            ),
-                          ],
+                    SizedBox(width: 2.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 2.w,
+                        vertical: 0.5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor().withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getPriorityName(),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _getPriorityColor(),
                         ),
                       ),
-                      const Spacer(),
-                      if (_formatDueDate().isNotEmpty) ...[
-                        CustomIconWidget(
-                          iconName: 'schedule',
+                    ),
+                    if (isCompleted) ...[
+                      SizedBox(width: 2.w),
+                      const CustomIconWidget(
+                        iconName: 'check_circle',
+                        color: Colors.green,
+                        size: 20,
+                      ),
+                    ],
+                  ],
+                ),
+                if (description.isNotEmpty) ...[
+                  SizedBox(height: 1.h),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: isCompleted
+                          ? AppTheme.lightTheme.colorScheme.onSurface
+                                .withValues(alpha: 0.5)
+                          : AppTheme.lightTheme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                SizedBox(height: 2.h),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 2.w,
+                        vertical: 0.5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getCategoryColor().withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CustomIconWidget(
+                            iconName: _getCategoryIcon(),
+                            color: _getCategoryColor(),
+                            size: 14,
+                          ),
+                          SizedBox(width: 1.w),
+                          Text(
+                            _getCategoryName(),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: _getCategoryColor(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_formatDueDate().isNotEmpty) ...[
+                      CustomIconWidget(
+                        iconName: 'schedule',
+                        color: isOverdue
+                            ? AppTheme.lightTheme.colorScheme.error
+                            : AppTheme.lightTheme.colorScheme.onSurface
+                                  .withValues(alpha: 0.6),
+                        size: 14,
+                      ),
+                      SizedBox(width: 1.w),
+                      Text(
+                        _formatDueDate(),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
                           color: isOverdue
                               ? AppTheme.lightTheme.colorScheme.error
                               : AppTheme.lightTheme.colorScheme.onSurface
                                     .withValues(alpha: 0.6),
-                          size: 14,
-                        ),
-                        SizedBox(width: 1.w),
-                        Text(
-                          _formatDueDate(),
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w500,
-                            color: isOverdue
-                                ? AppTheme.lightTheme.colorScheme.error
-                                : AppTheme.lightTheme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                      SizedBox(width: 2.w),
-                      GestureDetector(
-                        onTap: onSnooze,
-                        child: Container(
-                          padding: EdgeInsets.all(1.w),
-                          decoration: BoxDecoration(
-                            color: AppTheme.lightTheme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: AppTheme.lightTheme.colorScheme.outline
-                                  .withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: CustomIconWidget(
-                            iconName: 'more_vert',
-                            color: AppTheme.lightTheme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
-                            size: 16,
-                          ),
                         ),
                       ),
                     ],
-                  ),
-                ],
-              ),
+                    SizedBox(width: 2.w),
+                    GestureDetector(
+                      onTap: onSnooze,
+                      child: Container(
+                        padding: EdgeInsets.all(1.w),
+                        decoration: BoxDecoration(
+                          color: AppTheme.lightTheme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppTheme.lightTheme.colorScheme.outline
+                                .withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: CustomIconWidget(
+                          iconName: 'more_vert',
+                          color: AppTheme.lightTheme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

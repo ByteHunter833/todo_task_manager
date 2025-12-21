@@ -200,7 +200,7 @@ class _SortBottomSheetWidgetState extends State<SortBottomSheetWidget> {
                                       Text(
                                         option['description'] as String,
                                         style: TextStyle(
-                                          fontSize: 11.sp,
+                                          fontSize: 12.sp,
                                           color: AppTheme
                                               .lightTheme
                                               .colorScheme
@@ -278,7 +278,7 @@ class _SortBottomSheetWidgetState extends State<SortBottomSheetWidget> {
                         ? 'Ascending (A-Z, 1-9, Oldest first)'
                         : 'Descending (Z-A, 9-1, Newest first)',
                     style: TextStyle(
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       color: AppTheme.lightTheme.colorScheme.onSurface
                           .withValues(alpha: 0.6),
                     ),

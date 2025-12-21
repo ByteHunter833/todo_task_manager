@@ -86,4 +86,22 @@ class AuthController extends StateNotifier<AuthState> {
       state = state.copyWith(status: AsyncError(e, st));
     }
   }
+
+  Future<void> updateUserName(String displayName) async {
+    state = state.copyWith(status: const AsyncLoading());
+    try {
+      await _authService.updateDisplayName(displayName);
+      state = state.copyWith(
+        status: AsyncData(
+          AuthUser(
+            uid: state.userId!,
+            email: (state.status.value)?.email ?? '',
+            displayName: displayName,
+          ),
+        ),
+      );
+    } catch (e, st) {
+      state = state.copyWith(status: AsyncError(e, st));
+    }
+  }
 }

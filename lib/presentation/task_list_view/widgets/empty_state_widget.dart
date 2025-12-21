@@ -130,10 +130,11 @@ class EmptyStateWidget extends StatelessWidget {
             ] else ...[
               SizedBox(
                 width: double.infinity,
+                // height: 10.h,
                 child: ElevatedButton(
                   onPressed: onCreateTask,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 3.h),
+                    padding: EdgeInsets.symmetric(vertical: 2.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -150,7 +151,7 @@ class EmptyStateWidget extends StatelessWidget {
                       Text(
                         'Create Your First Task',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

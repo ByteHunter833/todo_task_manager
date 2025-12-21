@@ -42,4 +42,13 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     return await _auth.sendPasswordResetEmail(email: email);
   }
+
+  Future<void> updateDisplayName(String displayName) async {
+    final user = _auth.currentUser;
+    await user?.updateDisplayName(displayName);
+    await user?.reload();
+    await _firestore.collection('users').doc(user?.uid).set({
+      'displayName': displayName,
+    }, SetOptions(merge: true));
+  }
 }

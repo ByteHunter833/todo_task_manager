@@ -62,8 +62,48 @@ class _SettingsAndPreferencesState
     return user == null ? 'Not logged in' : user.email;
   }
 
+  Future<void> editName() async {
+    TextEditingController nameCotroller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Name'),
+          content: TextField(
+            decoration: const InputDecoration(hintText: 'Enter your new name'),
+            controller: nameCotroller,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await ref
+                    .read(authControllerProvider.notifier)
+                    .updateUserName(nameCotroller.text.trim());
+                ref.invalidate(currentUserProvider);
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  setState(() {});
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Watch the currentUserProvider to rebuild when it changes
+    ref.watch(currentUserProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: _buildAppBar(),
@@ -229,10 +269,13 @@ class _SettingsAndPreferencesState
               ],
             ),
           ),
-          CustomIconWidget(
-            iconName: 'edit',
-            color: AppTheme.lightTheme.colorScheme.onSurface,
-            size: 20,
+          IconButton(
+            onPressed: editName,
+            icon: CustomIconWidget(
+              iconName: 'edit',
+              color: AppTheme.lightTheme.colorScheme.onSurface,
+              size: 20,
+            ),
           ),
         ],
       ),

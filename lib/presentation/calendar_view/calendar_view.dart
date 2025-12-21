@@ -27,7 +27,6 @@ class _CalendarViewState extends ConsumerState<CalendarView>
   DateTime _currentMonth = DateTime.now();
   DateTime _selectedDate = DateTime.now();
   bool _isWeekView = false;
-  bool _isRefreshing = false;
   Map<DateTime, List<Map<String, dynamic>>> _tasksByDate = {};
 
   @override
@@ -184,18 +183,14 @@ class _CalendarViewState extends ConsumerState<CalendarView>
   }
 
   Future<void> _onRefresh() async {
-    setState(() {
-      _isRefreshing = true;
-    });
+    setState(() {});
 
     _refreshController.forward();
 
     // Simulate data refresh
     await Future.delayed(const Duration(seconds: 1));
 
-    setState(() {
-      _isRefreshing = false;
-    });
+    setState(() {});
 
     _refreshController.reset();
   }

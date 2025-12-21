@@ -114,7 +114,7 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                       child: Text(
                         'Clear All',
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: 13.sp,
                           color: AppTheme.lightTheme.colorScheme.error,
                         ),
                       ),
@@ -159,7 +159,7 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                                 ? '${_selectedDateRange!.start.month}/${_selectedDateRange!.start.day} - ${_selectedDateRange!.end.month}/${_selectedDateRange!.end.day}'
                                 : 'Select date range',
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: 14.sp,
                               color: _selectedDateRange != null
                                   ? AppTheme.lightTheme.colorScheme.onSurface
                                   : AppTheme.lightTheme.colorScheme.onSurface
@@ -225,7 +225,7 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                           .withValues(alpha: 0.2),
                       checkmarkColor: AppTheme.lightTheme.colorScheme.primary,
                       labelStyle: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 13.sp,
                         color: isSelected
                             ? AppTheme.lightTheme.colorScheme.primary
                             : AppTheme.lightTheme.colorScheme.onSurface,
@@ -279,7 +279,7 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                           .withValues(alpha: 0.2),
                       checkmarkColor: AppTheme.lightTheme.colorScheme.tertiary,
                       labelStyle: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 13.sp,
                         color: isSelected
                             ? AppTheme.lightTheme.colorScheme.tertiary
                             : AppTheme.lightTheme.colorScheme.onSurface,
@@ -330,7 +330,7 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                       selectedColor: Colors.green.withValues(alpha: 0.2),
                       checkmarkColor: Colors.green,
                       labelStyle: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 13.sp,
                         color: isSelected
                             ? Colors.green
                             : AppTheme.lightTheme.colorScheme.onSurface,

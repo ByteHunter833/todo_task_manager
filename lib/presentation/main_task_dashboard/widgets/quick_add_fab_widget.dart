@@ -53,27 +53,32 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
     setState(() {
       _isExpanded = !_isExpanded;
     });
-
     if (_isExpanded) {
       _animationController.forward();
     } else {
       _animationController.reverse();
     }
-
     HapticFeedback.lightImpact();
   }
 
   void _onActionTap(VoidCallback? action) {
-    _toggleExpanded();
-    Future.delayed(const Duration(milliseconds: 150), () {
-      action?.call();
-    });
+    if (action == null) {
+      debugPrint('🔴 QuickAddFabWidget: action is NULL!');
+      HapticFeedback.mediumImpact();
+      return;
+    }
+    print('🟢 QuickAddFabWidget: action is NOT null, calling...');
+    if (_isExpanded) {
+      _toggleExpanded();
+    }
+    action.call();
     HapticFeedback.mediumImpact();
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       alignment: Alignment.bottomRight,
       children: [
         // Voice Input FAB
@@ -101,7 +106,6 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
             );
           },
         ),
-
         // Quick Add FAB
         AnimatedBuilder(
           animation: _expandAnimation,
@@ -127,7 +131,6 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
             );
           },
         ),
-
         // Main FAB
         FloatingActionButton(
           heroTag: 'main_fab',
@@ -154,14 +157,6 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
         ),
 
         // Backdrop
-        _isExpanded
-            ? Positioned.fill(
-                child: GestureDetector(
-                  onTap: _toggleExpanded,
-                  child: Container(color: Colors.black.withValues(alpha: 0.1)),
-                ),
-              )
-            : const SizedBox.shrink(),
       ],
     );
   }
