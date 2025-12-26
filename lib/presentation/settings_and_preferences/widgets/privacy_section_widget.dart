@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
@@ -199,7 +201,7 @@ class _PrivacySectionWidgetState extends State<PrivacySectionWidget> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: retentionOptions.map((option) {
-            final isSelected = widget.dataRetention == option['value'];
+            // final isSelected = widget.dataRetention == option['value'];
             return RadioListTile<String>(
               title: Text(option['label']!),
               value: option['value']!,

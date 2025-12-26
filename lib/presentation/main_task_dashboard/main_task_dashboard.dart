@@ -115,12 +115,12 @@ class _MainTaskDashboardState extends ConsumerState<MainTaskDashboard>
     return completedCount / tasksForToday.length;
   }
 
-  void _onVoiceInput() {
-    HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Voice input feature coming soon!')),
-    );
-  }
+  // void _onVoiceInput() {
+  //   HapticFeedback.mediumImpact();
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(content: Text('Voice input feature coming soon!')),
+  //   );
+  // }
 
   int _calculateCompletionStreak(List<Todo> completedTodos) {
     if (completedTodos.isEmpty) return 0;

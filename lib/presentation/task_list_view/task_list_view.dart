@@ -1,4 +1,6 @@
 // lib/presentation/task_list_view/task_list_view.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -295,10 +297,11 @@ class _TaskListViewState extends ConsumerState<TaskListView>
                   comparison = 0;
                 } else if (aDate == null) {
                   comparison = 1;
-                } else if (bDate == null)
+                } else if (bDate == null) {
                   comparison = -1;
-                else
+                } else {
                   comparison = aDate.compareTo(bDate);
+                }
                 break;
               case 'priority':
                 final priorityOrder = {'High': 3, 'Medium': 2, 'Low': 1};
@@ -318,12 +321,13 @@ class _TaskListViewState extends ConsumerState<TaskListView>
                 final bCreated = b.createdAt as DateTime?;
                 if (aCreated == null && bCreated == null) {
                   comparison = 0;
-                } else if (aCreated == null)
+                } else if (aCreated == null) {
                   comparison = 1;
-                else if (bCreated == null)
+                } else if (bCreated == null) {
                   comparison = -1;
-                else
+                } else {
                   comparison = aCreated.compareTo(bCreated);
+                }
                 break;
             }
 

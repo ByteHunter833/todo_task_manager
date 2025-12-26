@@ -65,7 +65,6 @@ class CalendarWeekWidget extends StatelessWidget {
     return Row(
       children: List.generate(7, (index) {
         final date = startOfWeek.add(Duration(days: index));
-        print(date);
         return Expanded(child: _buildWeekDayCell(context, date));
       }),
     );

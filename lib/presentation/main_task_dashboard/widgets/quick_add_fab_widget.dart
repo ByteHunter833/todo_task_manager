@@ -63,11 +63,10 @@ class _QuickAddFabWidgetState extends State<QuickAddFabWidget>
 
   void _onActionTap(VoidCallback? action) {
     if (action == null) {
-      debugPrint('🔴 QuickAddFabWidget: action is NULL!');
       HapticFeedback.mediumImpact();
       return;
     }
-    print('🟢 QuickAddFabWidget: action is NOT null, calling...');
+
     if (_isExpanded) {
       _toggleExpanded();
     }

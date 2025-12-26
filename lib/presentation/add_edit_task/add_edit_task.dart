@@ -35,9 +35,6 @@ class _AddEditTaskState extends ConsumerState<AddEditTask> {
   Widget build(BuildContext context) {
     final isEditing = widget.initialTodo != null;
     final isarRepository = ref.read(todoRepositoryProvider);
-    final args = ModalRoute.of(context)?.settings.arguments;
-
-    print(args is DateTime);
 
     return PopScope(
       canPop: false,
